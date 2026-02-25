@@ -6,8 +6,8 @@ with the sorted result. Timing helpers measure execution time using
 """
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Dict
 import time
+from typing import Callable, Dict, Iterable, List
 
 
 def bubble_sort(data: Iterable) -> List:
@@ -88,12 +88,12 @@ def heap_sort(data: Iterable) -> List:
 
     def heapify(n, i):
         largest = i
-        l = 2 * i + 1
-        r = 2 * i + 2
-        if l < n and arr[l] > arr[largest]:
-            largest = l
-        if r < n and arr[r] > arr[largest]:
-            largest = r
+        left_idx = 2 * i + 1
+        right_idx = 2 * i + 2
+        if left_idx < n and arr[left_idx] > arr[largest]:
+            largest = left_idx
+        if right_idx < n and arr[right_idx] > arr[largest]:
+            largest = right_idx
         if largest != i:
             arr[i], arr[largest] = arr[largest], arr[i]
             heapify(n, largest)
@@ -251,8 +251,16 @@ def gnome_sort(data: Iterable) -> List:
     return arr
 
 
-def time_sort(algorithm: Callable[[Iterable], List], data: Iterable, repeat: int = 3) -> float:
-    """Time `algorithm` on `data`, running `repeat` times and returning average seconds."""
+def time_sort(
+    algorithm: Callable[[Iterable], List],
+    data: Iterable,
+    repeat: int = 3,
+) -> float:
+    """Time ``algorithm`` on ``data``.
+
+    Runs ``algorithm`` ``repeat`` times and returns the average elapsed
+    time in seconds.
+    """
     if repeat <= 0:
         raise ValueError("repeat must be >= 1")
     total = 0.0
@@ -261,12 +269,18 @@ def time_sort(algorithm: Callable[[Iterable], List], data: Iterable, repeat: int
         start = time.perf_counter()
         algorithm(to_run)
         end = time.perf_counter()
-        total += (end - start)
+        total += end - start
     return total / repeat
 
 
-def compare_algorithms(algorithms: Dict[str, Callable[[Iterable], List]], data: Iterable, repeat: int = 3) -> Dict[str, float]:
-    """Return a mapping algorithm_name -> average_time_seconds for each algorithm."""
+def compare_algorithms(
+    algorithms: Dict[str, Callable[[Iterable], List]],
+    data: Iterable,
+    repeat: int = 3,
+) -> Dict[str, float]:
+    """Return a mapping algorithm_name -> average_time_seconds for each
+    algorithm.
+    """
     results: Dict[str, float] = {}
     for name, alg in algorithms.items():
         results[name] = time_sort(alg, data, repeat=repeat)
