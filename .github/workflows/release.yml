@@ -64,23 +64,27 @@ jobs:
           script: |
             const fs = require('fs');
             const { execSync } = require('child_process');
-            // Determine tag name from context (refs/tags/<tag>)
-            const ref = github.context.ref || '';
-            const tag = ref.startsWith('refs/tags/') ? ref.replace('refs/tags/', '') : ref;
+            // Prefer github.context.ref but fall back to env vars to avoid
+            // runtime errors when github/context isn't available in this action.
+            const ref = (typeof github !== 'undefined' && github.context && github.context.ref)
+              ? github.context.ref
+              : (process.env.GITHUB_REF || process.env.GITHUB_REF_NAME || '');
+            const tag = ref && ref.startsWith('refs/tags/') ? ref.replace('refs/tags/', '') : ref;
             const ver = tag && tag.startsWith('v') ? tag.slice(1) : tag;
             let body = '';
             try {
               if (ver) {
                 const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
                 // match section starting with '## [X.Y.Z]' up to next '## [' or EOF
-                const re = new RegExp('^## \\\\[' + ver.replace(/[-\\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\\\][\\s\\S]*?(?=\\n## \\\\[|$)', 'm');
+                const esc = ver.replace(/[-\\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                const re = new RegExp('^## \\\\[' + esc + '\\\\][\\s\\S]*?(?=\\n## \\\\[|$)', 'm');
                 const m = changelog.match(re);
                 if (m) {
                   body = m[0].trim();
                 }
               }
             } catch (err) {
-              // ignore and fallback
+              // ignore and fallback to git log
             }
             if (!body) {
               try {
