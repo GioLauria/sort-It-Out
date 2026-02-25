@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sort-it-out"
-version = "0.2.0"
+version = "0.2.1"
 description = "SortItOut — a small educational collection of handwritten sorting algorithms, CLI and GUI tooling, and timing helpers for benchmarking."
 readme = "README.md"
 requires-python = ">=3.8"

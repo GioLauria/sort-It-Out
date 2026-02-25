@@ -9,6 +9,10 @@ semantic versioning.
 
 - Minor documentation updates and metadata improvements.
 
+## [0.2.1] - 2026-02-25
+
+- ci: test release automation (push tag `v0.2.1` to trigger workflow)
+
 ## [0.2.0] - 2026-02-25
 
 - GUI: added File menu (Import, Exit), Clear button, scrollbars, and live
