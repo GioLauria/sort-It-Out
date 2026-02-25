@@ -84,10 +84,13 @@ def run_gui():
     input_text.configure(yscrollcommand=input_scroll.set)
     input_scroll.grid(row=1, column=3, sticky="ns", pady=(2, 8))
 
-    ttk.Label(frm, text="Algorithm:").grid(row=2, column=0, sticky="w")
+    # Algorithm label + selector inline
+    alg_frame = ttk.Frame(frm)
+    alg_frame.grid(row=2, column=0, columnspan=2, sticky="w")
+    ttk.Label(alg_frame, text="Algorithm:").pack(side="left")
     alg_var = tk.StringVar(value="merge")
-    alg_menu = ttk.OptionMenu(frm, alg_var, "merge", *sorted(ALGORITHMS.keys()))
-    alg_menu.grid(row=2, column=1, sticky="w")
+    alg_menu = ttk.OptionMenu(alg_frame, alg_var, "merge", *sorted(ALGORITHMS.keys()))
+    alg_menu.pack(side="left", padx=(6, 0))
 
     repeat_var = tk.IntVar(value=3)
     ttk.Label(frm, text="Repeat (for timing):").grid(row=2, column=2, sticky="w")
