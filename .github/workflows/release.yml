@@ -57,11 +57,21 @@ jobs:
         run: |
           echo "Files in dist:"; ls -la dist || true; find dist -maxdepth 3 -type f -print || true
 
+      - name: Generate release notes
+        id: generate_notes
+        run: |
+          # produce a simple bullet list of the most recent commits for the release notes
+          git --no-pager log --pretty=format:'- %s (%an)' -n 200 > release_notes.md || true
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          body: ${{ steps.generate_notes.outputs.body }}
           files: |
             dist/**/*
         env:
