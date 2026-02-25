@@ -85,8 +85,8 @@ data = [5, 3, 2, 4, 1]
 print(bubble_sort(data))
 
 algos = {
-    "bubble": bubble_sort,
-    "merge": merge_sort,
+    "Bubble": bubble_sort,
+    "Merge": merge_sort,
 }
 results = compare_algorithms(algos, data, repeat=5)
 print(results)
@@ -117,25 +117,25 @@ console command will be available. Basic usage:
 # sort a file using merge sort (default)
 sortItOut -i data.txt
 
-# sort a file using quicksort
-sortItOut -i data.txt -s quick
+# sort a file using Quick sort
+sortItOut -i data.txt -s Quick
 
 # print timing (average over 5 runs)
-sortItOut -i data.txt -s quick --time -r 5
+sortItOut -i data.txt -s Quick --time -r 5
 
-# read from stdin and use bubble sort
-cat data.txt | sortItOut -s bubble
+# read from stdin and use Bubble sort
+cat data.txt | sortItOut -s Bubble
 ```
 
 You can also explicitly pass `-` as the input filename to force reading from
 stdin, e.g.:
 
 ```bash
-cat data.txt | sortItOut -i - -s bubble
+cat data.txt | sortItOut -i - -s Bubble
 ```
 
-The `--sort` option accepts algorithm names: bubble, quick, merge, selection,
-insertion, heap, shell, counting, radix, bucket, comb, cocktail, gnome.
+The `--sort` option accepts algorithm names: Bubble, Quick, Merge, Selection,
+Insertion, Heap, Shell, Counting, Radix, Bucket, Comb, Cocktail, Gnome.
 
 CLI options (examples)
 ----------------------
@@ -151,15 +151,15 @@ sortItOut -i data.txt
 Read from stdin (use `-` or omit `-i` and pipe data):
 
 ```bash
-cat data.txt | sortItOut -s bubble
+cat data.txt | sortItOut -s Bubble
 # or
-cat data.txt | sortItOut -i - -s bubble
+cat data.txt | sortItOut -i - -s Bubble
 ```
 
-- Algorithm (`-s`, `--sort`): choose the sorting algorithm (default: `merge`)
+-- Algorithm (`-s`, `--sort`): choose the sorting algorithm (default: `Merge`)
 
 ```bash
-sortItOut -i data.txt -s quick
+sortItOut -i data.txt -s Quick
 ```
 
 - Timing (`--time`) and repeats (`-r`, `--repeat`): print average timing
@@ -177,14 +177,14 @@ sortItOut --gui
 - Output file (`-o`, `--output`): write sorted results to a file (one per line)
 
 ```bash
-sortItOut -i data.txt -s gnome -o sorted.txt
+sortItOut -i data.txt -s Gnome -o sorted.txt
 ```
 
 - Combine options: sort with `quick`, write output and print timing separately
 
 ```bash
-sortItOut -i data.txt -s quick -o sorted.txt
-sortItOut -i data.txt -s quick --time -r 10
+sortItOut -i data.txt -s Quick -o sorted.txt
+sortItOut -i data.txt -s Quick --time -r 10
 ```
 
 Note: when using `--time` the program prints timing information to stdout
@@ -220,7 +220,7 @@ receive the CLI exit code. Example:
 
 ```python
 import sort_it_out
-exit_code = sort_it_out.run(["-s", "bubble", "-i", "data.txt"])
+exit_code = sort_it_out.run(["-s", "Bubble", "-i", "data.txt"])
 ```
 
 Project changes and current status

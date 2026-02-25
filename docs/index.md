@@ -66,8 +66,8 @@ data = [5, 3, 2, 4, 1]
 print(bubble_sort(data))
 
 algos = {
-		"bubble": bubble_sort,
-		"merge": merge_sort,
+		"Bubble": bubble_sort,
+		"Merge": merge_sort,
 }
 results = compare_algorithms(algos, data, repeat=5)
 print(results)
@@ -80,7 +80,7 @@ CLI notes
 	results to a file using the `-o/--output` option. Example:
 
 ```bash
-sortItOut -i data.txt -s gnome -o sorted.txt
+sortItOut -i data.txt -s Gnome -o sorted.txt
 ```
 
 Versioning
@@ -108,7 +108,7 @@ which runs the same CLI logic from Python. Example:
 
 ```python
 import sort_it_out
-sort_it_out.run(["-s", "merge", "-i", "data.txt"])
+sort_it_out.run(["-s", "Merge", "-i", "data.txt"])
 ```
 
 Add additional algorithm modules under `src/sort_it_out/` and export them
