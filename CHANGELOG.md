@@ -1,0 +1,48 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on "Keep a Changelog" and the project follows
+semantic versioning.
+
+## [Unreleased]
+
+- Minor documentation updates and metadata improvements.
+
+## [0.1.3] - 2026-02-25
+
+- CI: pushed tag `v0.1.3` (triggered release workflow).
+- Misc: small fixes and housekeeping commits on `master`.
+
+## [0.1.2] - 2026-02-25
+
+- CI: granted `contents: write` and `packages: write` permissions to the
+  release workflow so the action can create releases and upload artifacts
+  without 403 errors.
+
+## [0.1.1] - 2026-02-25
+
+- CI: adjusted release workflow to attach `dist/**/*` and added artifact
+  listing step to improve reliability of uploaded release assets.
+
+## [0.1.0] - 2026-02-25
+
+- Initial public release.
+- Features:
+  - Many handwritten sorting algorithm implementations (bubble, quick,
+    merge, selection, insertion, heap, shell, counting, radix, bucket,
+    comb, cocktail, gnome).
+  - CLI tool `sortItOut` with stdin support and timing helpers.
+  - Simple Tkinter GUI opened by default when invoked with no args.
+  - Programmatic entrypoint: `sort_it_out.run(argv)`.
+  - Tests (pytest), pre-commit hooks (Black, isort, flake8), and
+    per-algorithm documentation under `docs/alghorythms/`.
+  - `launcher.py` entrypoint and PyInstaller instructions to build
+    single-file executables.
+
+### Notes
+
+- Versioning: package now uses `setuptools_scm` to generate
+  `src/sort_it_out/_version.py` at build/install time. At runtime the
+  package prefers the generated version and falls back to the latest git
+  tag or `0.0.0` if none is available.
