@@ -96,9 +96,9 @@ Versioning
 - `quick_sort` — recursive quicksort with middle pivot; average O(n log n).
 - `merge_sort` — classic divide-and-conquer stable sort; O(n log n).
 
-See the full algorithm reference in the `alghorythms` section:
+See the full algorithm reference in the `algorithms` section:
 
-- [Algorithms reference](alghorythms/index.md)
+- [Algorithms reference](algorithms/index.md)
 
 Programmatic API
 ---------------

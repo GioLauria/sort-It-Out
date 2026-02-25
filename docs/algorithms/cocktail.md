@@ -1,3 +1,4 @@
+````markdown
 ## Cocktail Sort
 
 Description
@@ -24,3 +25,5 @@ print(cocktail_sort([3,1,2]))
 
 Implementation
 - Provided as `cocktail_sort` in the `sort_it_out` package.
+
+````

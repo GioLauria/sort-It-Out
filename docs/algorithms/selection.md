@@ -1,3 +1,4 @@
+````markdown
 ## Selection Sort
 
 Description
@@ -23,3 +24,5 @@ print(selection_sort([3,1,2]))
 
 Implementation
 - Provided as `selection_sort` in the `sort_it_out` package.
+
+````

@@ -1,3 +1,4 @@
+````markdown
 ## Shell Sort
 
 Description
@@ -24,3 +25,5 @@ print(shell_sort([3,1,2]))
 
 Implementation
 - Provided as `shell_sort` in the `sort_it_out` package.
+
+````

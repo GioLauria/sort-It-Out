@@ -1,3 +1,4 @@
+````markdown
 ## Bucket Sort
 
 Description
@@ -28,3 +29,5 @@ print(bucket_sort([0.3, 0.1, 0.2]))
 Implementation
 - Provided as `bucket_sort` in the `sort_it_out` package and will raise
   `TypeError` if inputs are not floats in the expected range.
+
+````

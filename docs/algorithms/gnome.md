@@ -1,3 +1,4 @@
+````markdown
 ## Gnome Sort
 
 Description
@@ -24,3 +25,5 @@ print(gnome_sort([3,1,2]))
 
 Implementation
 - Provided as `gnome_sort` in the `sort_it_out` package.
+
+````

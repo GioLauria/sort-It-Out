@@ -219,9 +219,9 @@ def run_gui():
         try:
             repo_root = Path(__file__).resolve().parents[2]
             doc_paths = [
-                repo_root / "docs" / "alghorythms" / f"{name.lower()}.md",
+                repo_root / "docs" / "algorithms" / f"{name.lower()}.md",
                 repo_root / "docs" / f"{name.lower()}.md",
-                repo_root / "docs" / "alghorythms" / "index.md",
+                repo_root / "docs" / "algorithms" / "index.md",
             ]
             content = None
             for p in doc_paths:

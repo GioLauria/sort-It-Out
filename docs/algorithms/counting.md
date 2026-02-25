@@ -1,3 +1,4 @@
+````markdown
 ## Counting Sort
 
 Description
@@ -28,3 +29,5 @@ print(counting_sort([3,1,2]))
 Implementation
 - Provided as `counting_sort` in the `sort_it_out` package and will raise
   `TypeError` if non-integer inputs are provided.
+
+````

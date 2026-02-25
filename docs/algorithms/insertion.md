@@ -1,3 +1,4 @@
+````markdown
 ## Insertion Sort
 
 Description
@@ -25,3 +26,5 @@ print(insertion_sort([3,1,2]))
 
 Implementation
 - Provided as `insertion_sort` in the `sort_it_out` package.
+
+````

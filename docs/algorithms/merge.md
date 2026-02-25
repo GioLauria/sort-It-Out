@@ -1,3 +1,4 @@
+````markdown
 ## Merge Sort
 
 Description
@@ -25,3 +26,5 @@ print(merge_sort([3,1,2]))
 
 Implementation
 - Provided as `merge_sort` in the `sort_it_out` package.
+
+````

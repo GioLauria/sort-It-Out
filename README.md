@@ -12,19 +12,19 @@ Supported algorithms
 The project currently provides these sorting algorithms (click an algorithm
 to open its documentation page under the `docs/` folder):
 
-- [Bubble Sort](docs/alghorythms/bubble.md)
-- [Quick Sort](docs/alghorythms/quick.md)
-- [Merge Sort](docs/alghorythms/merge.md)
-- [Selection Sort](docs/alghorythms/selection.md)
-- [Insertion Sort](docs/alghorythms/insertion.md)
-- [Heap Sort](docs/alghorythms/heap.md)
-- [Shell Sort](docs/alghorythms/shell.md)
-- [Counting Sort](docs/alghorythms/counting.md)
-- [Radix Sort](docs/alghorythms/radix.md)
-- [Bucket Sort](docs/alghorythms/bucket.md)
-- [Comb Sort](docs/alghorythms/comb.md)
-- [Cocktail Sort](docs/alghorythms/cocktail.md)
-- [Gnome Sort](docs/alghorythms/gnome.md)
+- [Bubble Sort](docs/algorithms/bubble.md)
+- [Quick Sort](docs/algorithms/quick.md)
+- [Merge Sort](docs/algorithms/merge.md)
+- [Selection Sort](docs/algorithms/selection.md)
+- [Insertion Sort](docs/algorithms/insertion.md)
+- [Heap Sort](docs/algorithms/heap.md)
+- [Shell Sort](docs/algorithms/shell.md)
+- [Counting Sort](docs/algorithms/counting.md)
+- [Radix Sort](docs/algorithms/radix.md)
+- [Bucket Sort](docs/algorithms/bucket.md)
+- [Comb Sort](docs/algorithms/comb.md)
+- [Cocktail Sort](docs/algorithms/cocktail.md)
+- [Gnome Sort](docs/algorithms/gnome.md)
 
 Each docs page contains a short explanation, complexity notes and example
 usage for the corresponding algorithm.
@@ -258,7 +258,7 @@ Recent updates made to the repository (what changed and where to look):
     can create releases and attach artifacts reliably.
 
 - **Documentation:** Per-algorithm docs are available under
-    `docs/alghorythms/` and contributor docs cover testing, pre-commit and
+    `docs/algorithms/` and contributor docs cover testing, pre-commit and
     building executables.
 
 - **Tooling & quality:** Pre-commit hooks (Black, isort, flake8) and

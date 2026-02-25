@@ -1,3 +1,4 @@
+````markdown
 ## Quick Sort
 
 Description
@@ -28,3 +29,5 @@ print(quick_sort([3,1,2]))
 
 Implementation
 - Provided as `quick_sort` in the `sort_it_out` package.
+
+````

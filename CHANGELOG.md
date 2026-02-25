@@ -7,7 +7,19 @@ semantic versioning.
 
 ## [Unreleased]
 
+- Docs: moved per-algorithm documentation to `docs/algorithms/` and
+  removed legacy `docs/alghorythms/` folder.
 - Minor documentation updates and metadata improvements.
+
+## [0.2.3] - 2026-02-25
+
+- Release: pushed tag `v0.2.3` with documentation updates and packaging
+  tweaks.
+
+## [0.2.2] - 2026-02-25
+
+- Release: small fixes and documentation normalization; preparatory
+  housekeeping for subsequent patch releases.
 
 ## [0.2.1] - 2026-02-25
 
@@ -53,7 +65,7 @@ semantic versioning.
   - Simple Tkinter GUI opened by default when invoked with no args.
   - Programmatic entrypoint: `sort_it_out.run(argv)`.
   - Tests (pytest), pre-commit hooks (Black, isort, flake8), and
-    per-algorithm documentation under `docs/alghorythms/`.
+    per-algorithm documentation under `docs/algorithms/`.
   - `launcher.py` entrypoint and PyInstaller instructions to build
     single-file executables.
 

@@ -1,3 +1,4 @@
+````markdown
 ## Heap Sort
 
 Description
@@ -24,3 +25,5 @@ print(heap_sort([3,1,2]))
 
 Implementation
 - Provided as `heap_sort` in the `sort_it_out` package.
+
+````
