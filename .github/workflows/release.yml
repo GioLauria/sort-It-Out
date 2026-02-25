@@ -59,12 +59,16 @@ jobs:
 
       - name: Generate release notes
         id: generate_notes
-        run: |
-          # produce a simple bullet list of the most recent commits for the release notes
-          git --no-pager log --pretty=format:'- %s (%an)' -n 200 > release_notes.md || true
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          cat release_notes.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            try {
+              const notes = execSync("git --no-pager log --pretty=format:'- %s (%an)' -n 200", { encoding: 'utf8' });
+              return { body: notes };
+            } catch (err) {
+              return { body: 'No commit notes generated.' };
+            }
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1
