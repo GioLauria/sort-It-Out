@@ -22,19 +22,24 @@ from .sorts import (
 )
 
 ALGORITHMS: Dict[str, Callable[[List], List]] = {
-    "bubble": bubble_sort,
-    "quick": quick_sort,
-    "merge": merge_sort,
-    "selection": selection_sort,
-    "insertion": insertion_sort,
-    "heap": heap_sort,
-    "shell": shell_sort,
-    "counting": counting_sort,
-    "radix": radix_sort,
-    "bucket": bucket_sort,
-    "comb": comb_sort,
-    "cocktail": cocktail_sort,
-    "gnome": gnome_sort,
+    "Bubble": bubble_sort,
+    "Quick": quick_sort,
+    "Merge": merge_sort,
+    "Selection": selection_sort,
+    "Insertion": insertion_sort,
+    "Heap": heap_sort,
+    "Shell": shell_sort,
+    "Counting": counting_sort,
+    "Radix": radix_sort,
+    "Bucket": bucket_sort,
+    "Comb": comb_sort,
+    "Cocktail": cocktail_sort,
+    "Gnome": gnome_sort,
+}
+
+# Case-insensitive lookup mapping to preserve backward compatibility
+ALGORITHMS_LOWER: Dict[str, Callable[[List], List]] = {
+    name.lower(): func for name, func in ALGORITHMS.items()
 }
 
 __all__ = ["ALGORITHMS"]

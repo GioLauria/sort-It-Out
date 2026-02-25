@@ -11,7 +11,7 @@ import sys
 from typing import List, Optional
 
 from . import gui
-from .algorithms import ALGORITHMS
+from .algorithms import ALGORITHMS, ALGORITHMS_LOWER
 from .sorts import time_sort
 
 
@@ -60,8 +60,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "-s",
         "--sort",
-        default="merge",
-        help="sorting algorithm to use (default: merge)",
+        default="Merge",
+        help="sorting algorithm to use (default: Merge)",
     )
     parser.add_argument(
         "--time", action="store_true", help="print average timing instead of values"
@@ -89,14 +89,18 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 3
         return 0
 
-    alg_name = ns.sort.lower()
-    if alg_name not in ALGORITHMS:
+    alg_raw = ns.sort
+    # Try exact (capitalized) name first, otherwise case-insensitive lookup
+    algorithm = ALGORITHMS.get(alg_raw) or ALGORITHMS_LOWER.get(alg_raw.lower())
+    if algorithm is None:
         names = ", ".join(sorted(ALGORITHMS.keys()))
         print(f"Unknown algorithm: {ns.sort}\nAvailable: {names}")
         return 2
 
+    # Determine display name (the canonical capitalized name)
+    display_name = next((n for n, f in ALGORITHMS.items() if f is algorithm), alg_raw)
+
     data = read_input(ns.input)
-    algorithm = ALGORITHMS[alg_name]
 
     if ns.time:
         try:
@@ -104,7 +108,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         except Exception as exc:
             print(f"Error while timing: {exc}")
             return 3
-        print(f"{alg_name}: {t:.6f} sec (avg over {ns.repeat} runs)")
+        print(f"{display_name}: {t:.6f} sec (avg over {ns.repeat} runs)")
     else:
         try:
             out = algorithm(data)
