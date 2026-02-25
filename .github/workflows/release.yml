@@ -64,8 +64,7 @@ jobs:
           script: |
             const fs = require('fs');
             const { execSync } = require('child_process');
-            // Prefer github.context.ref but fall back to env vars to avoid
-            // runtime errors when github/context isn't available in this action.
+            // Robustly determine tag name from various environment sources
             const ref = (typeof github !== 'undefined' && github.context && github.context.ref)
               ? github.context.ref
               : (process.env.GITHUB_REF || process.env.GITHUB_REF_NAME || '');
@@ -75,12 +74,13 @@ jobs:
             try {
               if (ver) {
                 const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
-                // match section starting with '## [X.Y.Z]' up to next '## [' or EOF
-                const esc = ver.replace(/[-\\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                const re = new RegExp('^## \\\\[' + esc + '\\\\][\\s\\S]*?(?=\\n## \\\\[|$)', 'm');
-                const m = changelog.match(re);
-                if (m) {
-                  body = m[0].trim();
+                const header = '## [' + ver + ']';
+                const idx = changelog.indexOf(header);
+                if (idx !== -1) {
+                  // find next section header starting with '\n## [' after the matched one
+                  const nextIdx = changelog.indexOf('\n## [', idx + header.length);
+                  body = (nextIdx === -1) ? changelog.slice(idx) : changelog.slice(idx, nextIdx);
+                  body = body.trim();
                 }
               }
             } catch (err) {
@@ -93,7 +93,17 @@ jobs:
                 body = 'No commit notes generated.';
               }
             }
-            return { body };
+            // Write multiline output reliably to GITHUB_OUTPUT for downstream steps
+            const outPath = process.env.GITHUB_OUTPUT;
+            if (outPath) {
+              // Guard against the unlikely presence of EOF marker in body
+              const marker = 'END_OF_RELEASE_BODY';
+              const safeBody = body.replace(new RegExp(marker, 'g'), marker + '_REPLACED');
+              fs.appendFileSync(outPath, `body<<${marker}\n${safeBody}\n${marker}\n`);
+            } else {
+              // Fallback: set as console result (github-script will expose as 'result')
+              return { body };
+            }
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1
