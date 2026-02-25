@@ -59,12 +59,15 @@ def run_gui():
             return
         input_text.delete("1.0", "end")
         input_text.insert("1.0", content)
-        # update items count
+        # update items count and algorithm menu
         try:
-            count = len(_parse_input(content))
+            parsed = _parse_input(content)
+            count = len(parsed)
         except Exception:
+            parsed = []
             count = 0
         items_label.config(text=f"Items: {count}")
+        _update_alg_menu_for(parsed)
 
     def _exit_app():
         root.quit()
@@ -90,6 +93,7 @@ def run_gui():
             txt = input_text.get("1.0", "end")
             count = len(_parse_input(txt))
             items_label.config(text=f"Items: {count}")
+            _update_alg_menu_for(_parse_input(txt))
         except Exception:
             items_label.config(text="Items: 0")
         finally:
@@ -114,6 +118,59 @@ def run_gui():
     )
     alg_menu.pack(side="left", padx=(6, 0))
 
+    def _supported_algorithms_for(data_list):
+        """Return list of algorithm names (capitalized keys) that support data."""
+        if not data_list:
+            return list(sorted(ALGORITHMS.keys()))
+
+        # Determine types present
+        has_str = any(isinstance(x, str) for x in data_list)
+        has_int = any(isinstance(x, int) and not isinstance(x, bool) for x in data_list)
+        has_float = any(isinstance(x, float) for x in data_list)
+
+        # Mixed strings and numbers are not comparable in Python3
+        if has_str and (has_int or has_float):
+            return []
+
+        allowed = []
+        for name, func in ALGORITHMS.items():
+            lname = name.lower()
+            if lname in ("counting", "radix"):
+                # integer-only algorithms
+                if has_int and not has_float and not has_str:
+                    allowed.append(name)
+            elif lname == "bucket":
+                # bucket expects floats in [0,1)
+                if not has_str and (has_float or has_int):
+                    # check values are floats in [0,1)
+                    try:
+                        vals = [float(x) for x in data_list]
+                    except Exception:
+                        continue
+                    if vals and all(0.0 <= v < 1.0 for v in vals):
+                        allowed.append(name)
+            else:
+                # comparison-based algorithms: require homogeneous comparable types
+                if has_str and not (has_int or has_float):
+                    allowed.append(name)
+                elif (has_int or has_float) and not has_str:
+                    allowed.append(name)
+        return sorted(allowed)
+
+    def _update_alg_menu_for(data_list):
+        menu = alg_menu["menu"]
+        menu.delete(0, "end")
+        allowed = _supported_algorithms_for(data_list)
+        if not allowed:
+            menu.add_command(label="(no supported algorithms)", state="disabled")
+            alg_var.set("")
+            return
+        for name in allowed:
+            menu.add_command(label=name, command=lambda v=name: alg_var.set(v))
+        # If current selection is not allowed, set to the first allowed
+        if alg_var.get() not in allowed:
+            alg_var.set(allowed[0])
+
     repeat_var = tk.IntVar(value=3)
     ttk.Label(frm, text="Repeat (for timing):").grid(row=2, column=2, sticky="w")
     repeat_entry = ttk.Entry(frm, textvariable=repeat_var, width=6)
@@ -132,6 +189,9 @@ def run_gui():
 
     items_label = ttk.Label(frm, text="Items: 0")
     items_label.grid(row=6, column=2, columnspan=2, sticky="w", pady=(6, 0))
+
+    # Initialize algorithm menu to show all algorithms
+    _update_alg_menu_for([])
 
     def do_sort():
         txt = input_text.get("1.0", "end")
@@ -189,6 +249,7 @@ def run_gui():
             pass
         items_label.config(text="Items: 0")
         time_label.config(text="Last sort: N/A")
+        _update_alg_menu_for([])
 
     btn_sort = ttk.Button(frm, text="Sort", command=do_sort)
     btn_sort.grid(row=5, column=0, sticky="w")
