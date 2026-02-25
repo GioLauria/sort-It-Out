@@ -1,5 +1,6 @@
 import argparse
 import random
+import time
 
 
 def main(
@@ -10,9 +11,13 @@ def main(
     Defaults: 1000 numbers between 0 and 1_000_000_000.
     """
     random.seed()
+    t0 = time.perf_counter()
     with open(path, "w", encoding="utf-8") as fh:
         for _ in range(count):
             fh.write(str(random.randint(lo, hi)) + "\n")
+    t1 = time.perf_counter()
+    elapsed = t1 - t0
+    print(f"Wrote {count} integers to '{path}' in {elapsed:.4f} seconds")
 
 
 if __name__ == "__main__":
