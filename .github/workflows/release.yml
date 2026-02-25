@@ -62,13 +62,34 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const fs = require('fs');
             const { execSync } = require('child_process');
+            // Determine tag name from context (refs/tags/<tag>)
+            const ref = github.context.ref || '';
+            const tag = ref.startsWith('refs/tags/') ? ref.replace('refs/tags/', '') : ref;
+            const ver = tag && tag.startsWith('v') ? tag.slice(1) : tag;
+            let body = '';
             try {
-              const notes = execSync("git --no-pager log --pretty=format:'- %s (%an)' -n 200", { encoding: 'utf8' });
-              return { body: notes };
+              if (ver) {
+                const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+                // match section starting with '## [X.Y.Z]' up to next '## [' or EOF
+                const re = new RegExp('^## \\\\[' + ver.replace(/[-\\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\\\][\\s\\S]*?(?=\\n## \\\\[|$)', 'm');
+                const m = changelog.match(re);
+                if (m) {
+                  body = m[0].trim();
+                }
+              }
             } catch (err) {
-              return { body: 'No commit notes generated.' };
+              // ignore and fallback
             }
+            if (!body) {
+              try {
+                body = execSync("git --no-pager log --pretty=format:'- %s (%an)' -n 200", { encoding: 'utf8' });
+              } catch (err) {
+                body = 'No commit notes generated.';
+              }
+            }
+            return { body };
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1
