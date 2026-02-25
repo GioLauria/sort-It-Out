@@ -17,14 +17,14 @@ This document explains how contributors can create standalone executables for So
 - Test the produced binary on a clean machine or VM to verify all runtime files are bundled.
 
 **1. Create a tiny launcher**
-Create a small launcher module that imports the packaged CLI entrypoint. Add the file `src/launcher.py` with the following contents:
+Create a small launcher module that imports the packaged CLI entrypoint. Add the file `launcher.py` at the repository root with the following contents:
 
 ```python
 from sort_it_out import cli
-import sys
+
 
 if __name__ == "__main__":
-    raise SystemExit(cli.main())
+  raise SystemExit(cli.main())
 ```
 
 This file gives PyInstaller a clear module to freeze.
@@ -42,7 +42,8 @@ pip install -e . pyinstaller
 2. Run PyInstaller to make a one-file exe:
 
 ```powershell
-pyinstaller --onefile --name sortItOut --console src\launcher.py
+# build using the repo-root launcher
+pyinstaller --onefile --name sortItOut --console launcher.py
 # output executable: dist\sortItOut.exe
 ```
 
@@ -59,7 +60,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -e . pyinstaller
-pyinstaller --onefile --name sortItOut --console src/launcher.py
+# build using the repo-root launcher
+pyinstaller --onefile --name sortItOut --console launcher.py
 # output artifact: dist/sortItOut
 ```
 
@@ -70,7 +72,7 @@ FROM python:3.11-slim
 WORKDIR /src
 COPY . /src
 RUN python -m pip install --upgrade pip && pip install -e . pyinstaller
-RUN pyinstaller --onefile --name sortItOut --console src/launcher.py
+  RUN pyinstaller --onefile --name sortItOut --console launcher.py
 ```
 
 Build and extract the artifact:
@@ -116,8 +118,8 @@ jobs:
 **7. Quick checklist for contributors**
 - [ ] Create and activate a venv on the target platform.
 - [ ] Install `pip install -e . pyinstaller`.
-- [ ] Add `src/launcher.py` if not present.
-- [ ] Run `pyinstaller --onefile --name sortItOut --console src/launcher.py`.
+- [ ] Add `launcher.py` at the repository root if not present.
+- [ ] Run `pyinstaller --onefile --name sortItOut --console launcher.py`.
 - [ ] Test the produced binary on a clean environment/VM.
 - [ ] (Optional) Sign the binary and produce checksums.
 
@@ -126,6 +128,6 @@ jobs:
 - For reproducible builds, pin Python version, PyInstaller version, and build inside a container that you control.
 
 If you want, I can:
-- Add `src/launcher.py` to the repo now and commit it, or
+- Add `launcher.py` to the repo now and commit it, or
 - Add a small `docs/` README snippet into `CONTRIBUTING.md` linking to this guide, or
 - Create a sample GitHub Actions workflow that builds and uploads binaries for a tagged release.
