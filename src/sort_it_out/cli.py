@@ -72,20 +72,14 @@ def read_input(path: Optional[str]) -> List:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    # If invoked with no CLI arguments (direct `sortItOut`) decide mode:
-    # - If data is piped on stdin (non-interactive), treat as CLI reading stdin.
-    # - Otherwise open the GUI.
+    # If invoked with no CLI arguments (direct `sortItOut`), open GUI by default
     if argv is None and len(sys.argv) == 1:
         try:
-            if not sys.stdin.isatty():
-                # Piped data present: operate in CLI mode reading from stdin
-                argv = ["-"]
-            else:
-                gui.run_gui()
-                return 0
+            gui.run_gui()
         except Exception as exc:
             print(f"Error launching GUI: {exc}")
             return 3
+        return 0
 
     parser = argparse.ArgumentParser(prog="sortItOut")
     parser.add_argument(
