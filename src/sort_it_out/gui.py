@@ -287,21 +287,22 @@ def run_gui():
                 docs_view.insert("1.0", f"Error loading docs for '{name}': {exc}")
 
     repeat_var = tk.IntVar(value=3)
-    ttk.Label(frm, text="Repeat (for timing):").grid(row=2, column=2, sticky="w")
+    # Move Repeat controls to align with input/output columns (left side)
+    ttk.Label(frm, text="Repeat (for timing):").grid(row=3, column=0, sticky="w")
     repeat_entry = ttk.Entry(frm, textvariable=repeat_var, width=6)
-    repeat_entry.grid(row=2, column=3, sticky="w")
+    repeat_entry.grid(row=3, column=1, sticky="w")
 
     output_label = ttk.Label(frm, text="Output:")
-    output_label.grid(row=3, column=0, sticky="w", pady=(8, 0))
+    output_label.grid(row=4, column=0, sticky="w", pady=(8, 0))
     output_text = tk.Text(frm, height=10, width=60)
-    output_text.grid(row=4, column=0, columnspan=3, pady=(2, 8))
+    output_text.grid(row=5, column=0, columnspan=3, pady=(2, 8))
     output_scroll = ttk.Scrollbar(frm, orient="vertical", command=output_text.yview)
     output_text.configure(yscrollcommand=output_scroll.set)
-    output_scroll.grid(row=4, column=3, sticky="ns", pady=(2, 8))
+    output_scroll.grid(row=5, column=3, sticky="ns", pady=(2, 8))
 
     # Documentation viewer on the right
     docs_frame = ttk.Frame(frm)
-    docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
+    docs_frame.grid(row=0, column=4, rowspan=9, sticky="nsew", padx=(12, 0))
     ttk.Label(docs_frame, text="Algorithm docs:").grid(row=0, column=0, sticky="w")
     # Font size control for docs viewer
     docs_font_size_var = tk.IntVar(value=_docs_font_px)
@@ -416,10 +417,10 @@ def run_gui():
         docs_scroll.grid(row=0, column=1, sticky="ns")
 
     time_label = ttk.Label(frm, text="Last sort: N/A")
-    time_label.grid(row=6, column=0, columnspan=2, sticky="w", pady=(6, 0))
+    time_label.grid(row=7, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
     items_label = ttk.Label(frm, text="Items: 0")
-    items_label.grid(row=6, column=2, columnspan=2, sticky="w", pady=(6, 0))
+    items_label.grid(row=7, column=2, columnspan=2, sticky="w", pady=(6, 0))
 
     # Initialize algorithm menu to show all algorithms
     _update_alg_menu_for([])
@@ -542,11 +543,11 @@ def run_gui():
         _update_alg_menu_for([])
 
     btn_sort = ttk.Button(frm, text="Sort", command=do_sort)
-    btn_sort.grid(row=5, column=0, sticky="w")
+    btn_sort.grid(row=6, column=0, sticky="w")
     btn_time = ttk.Button(frm, text="Time", command=do_time)
-    btn_time.grid(row=5, column=1, sticky="w")
+    btn_time.grid(row=6, column=1, sticky="w")
     btn_clear = ttk.Button(frm, text="Clear", command=do_clear)
-    btn_clear.grid(row=5, column=2, sticky="w")
+    btn_clear.grid(row=6, column=2, sticky="w")
 
     root.mainloop()
 
