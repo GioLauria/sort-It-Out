@@ -98,6 +98,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     parser.add_argument("--gui", action="store_true", help="run graphical interface")
     parser.add_argument(
+        "-o",
+        "--output",
+        help="output file to write sorted values (one per line).",
+    )
+    parser.add_argument(
         "-r",
         "--repeat",
         type=int,
@@ -136,8 +141,18 @@ def main(argv: Optional[List[str]] = None) -> int:
         except Exception as exc:
             print(f"Error while sorting: {exc}")
             return 3
-        for item in out:
-            print(item)
+        # If an output file is provided, write results there; otherwise print to stdout
+        if ns.output:
+            try:
+                with open(ns.output, "w", encoding="utf-8") as fh:
+                    for item in out:
+                        fh.write(f"{item}\n")
+            except Exception as exc:
+                print(f"Error writing output file: {exc}")
+                return 3
+        else:
+            for item in out:
+                print(item)
     return 0
 
 
