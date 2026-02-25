@@ -47,6 +47,8 @@ pre-commit install
 pre-commit run --all-files
 ```
 
+See the detailed per-platform instructions in `docs/pre-commit.md`.
+
 3. Run tests.
 
 ```powershell
