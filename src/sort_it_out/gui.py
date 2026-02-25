@@ -223,6 +223,21 @@ def run_gui():
                 repo_root / "docs" / f"{name.lower()}.md",
                 repo_root / "docs" / "algorithms" / "index.md",
             ]
+            # Also consider docs installed inside the package (when packaged by
+            # the installer/wheel). Use importlib.resources to locate package
+            # data if present.
+            try:
+                import importlib.resources as pkg_res
+
+                pkg_docs_alg = pkg_res.files("sort_it_out") / "docs" / "algorithms"
+                pkg_docs_md = pkg_res.files("sort_it_out") / "docs"
+                # append package-installed locations to search list
+                doc_paths.append(pkg_docs_alg / f"{name.lower()}.md")
+                doc_paths.append(pkg_docs_md / f"{name.lower()}.md")
+                doc_paths.append(pkg_docs_alg / "index.md")
+            except Exception:
+                # importlib.resources may not find package data; ignore
+                pass
             content = None
             for p in doc_paths:
                 if p.exists():
