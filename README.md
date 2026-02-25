@@ -104,6 +104,26 @@ sortItOut -i data.txt -s quick --time -r 5
 cat data.txt | sortItOut -s bubble
 ```
 
+You can also explicitly pass `-` as the input filename to force reading from
+stdin, e.g.:
+
+```bash
+cat data.txt | sortItOut -i - -s bubble
+```
+
 The `--sort` option accepts algorithm names: bubble, quick, merge, selection,
 insertion, heap, shell, counting, radix, bucket, comb, cocktail, gnome.
+
+Graphical interface
+-------------------
+
+You can run a simple graphical interface that accepts input, algorithm
+selection and displays results using the `--gui` flag:
+
+```bash
+sortItOut --gui
+```
+
+The GUI uses Tkinter (part of the Python standard library) and requires no
+additional dependencies.
 

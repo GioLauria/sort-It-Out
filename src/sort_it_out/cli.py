@@ -11,7 +11,7 @@ import sys
 from typing import Callable, Dict, Iterable, List, Optional
 
 from . import (bubble_sort, bucket_sort, cocktail_sort, comb_sort,
-               counting_sort, gnome_sort, heap_sort, insertion_sort,
+               counting_sort, gnome_sort, gui, heap_sort, insertion_sort,
                merge_sort, quick_sort, radix_sort, selection_sort, shell_sort)
 from .sorts import time_sort
 
@@ -49,7 +49,8 @@ def _parse_value(s: str):
 
 def read_input(path: Optional[str]) -> List:
     lines: List[str]
-    if path:
+    # Accept None (no -i passed) or '-' to read from stdin
+    if path and path != "-":
         with open(path, "r", encoding="utf-8") as fh:
             lines = [line.rstrip("\n") for line in fh]
     else:
@@ -62,7 +63,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "-i",
         "--input",
-        help="input file (one value per line). If omitted, reads stdin.",
+        help="input file (one value per line). If omitted or '-' reads stdin.",
     )
     parser.add_argument(
         "-s",
@@ -73,6 +74,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--time", action="store_true", help="print average timing instead of values"
     )
+    parser.add_argument("--gui", action="store_true", help="run graphical interface")
     parser.add_argument(
         "-r",
         "--repeat",
@@ -81,6 +83,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         help="repeat times for timing (default: 3)",
     )
     ns = parser.parse_args(argv)
+
+    if ns.gui:
+        try:
+            gui.run_gui()
+        except Exception as exc:
+            print(f"Error launching GUI: {exc}")
+            return 3
+        return 0
 
     alg_name = ns.sort.lower()
     if alg_name not in ALGORITHMS:

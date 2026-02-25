@@ -79,6 +79,10 @@ print(results)
 - `quick_sort` — recursive quicksort with middle pivot; average O(n log n).
 - `merge_sort` — classic divide-and-conquer stable sort; O(n log n).
 
+See the full algorithm reference in the `alghorythms` section:
+
+- [Algorithms reference](alghorythms/index.md)
+
 Add additional algorithm modules under `src/sort_it_out/` and export them
 from `src/sort_it_out/__init__.py` to make them available for benchmarking.
 
