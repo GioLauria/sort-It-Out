@@ -1,6 +1,8 @@
-# Project Template (Python)
+# SortItOut
 
-This repository is a minimal template for Python projects. Replace placeholders and `your_package` with your package name when creating a new repository from this template.
+SortItOut provides small sorting helpers and example code for learning and
+experimentation. The package is `sort_it_out` and the project is configured
+for editable installs during development.
 
 **Author:** Giovanni Lauria <giovanni.lauria@gmail.com>
 
