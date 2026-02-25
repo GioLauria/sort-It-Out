@@ -151,10 +151,25 @@ def run_gui():
         output_text.insert("1.0", f"{alg_name}: {t:.6f} sec (avg over {rep} runs)")
         time_label.config(text=f"Last timed: {t:.6f} sec (avg)")
 
+    def do_clear():
+        """Clear both input and output text areas and reset counters."""
+        try:
+            input_text.delete("1.0", "end")
+        except Exception:
+            pass
+        try:
+            output_text.delete("1.0", "end")
+        except Exception:
+            pass
+        items_label.config(text="Items: 0")
+        time_label.config(text="Last sort: N/A")
+
     btn_sort = ttk.Button(frm, text="Sort", command=do_sort)
     btn_sort.grid(row=5, column=0, sticky="w")
     btn_time = ttk.Button(frm, text="Time", command=do_time)
     btn_time.grid(row=5, column=1, sticky="w")
+    btn_clear = ttk.Button(frm, text="Clear", command=do_clear)
+    btn_clear.grid(row=5, column=2, sticky="w")
 
     root.mainloop()
 
