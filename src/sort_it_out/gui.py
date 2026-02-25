@@ -5,6 +5,8 @@ algorithm and view the sorted output or timing results.
 """
 from __future__ import annotations
 
+import subprocess
+import sys
 import time
 import tkinter as tk
 from pathlib import Path
@@ -13,6 +15,17 @@ from tkinter import filedialog, messagebox, ttk
 from . import __version__
 from .algorithms import ALGORITHMS, ALGORITHMS_LOWER
 from .sorts import time_sort
+
+# Optional markdown -> HTML rendering support
+try:
+    import markdown
+    from tkhtmlview import HTMLLabel
+
+    _MD_HTML_AVAILABLE = True
+except Exception:
+    markdown = None
+    HTMLLabel = None
+    _MD_HTML_AVAILABLE = False
 
 
 def _parse_value(s: str):
@@ -46,6 +59,27 @@ def run_gui():
 
     frm = ttk.Frame(root, padding=10)
     frm.grid(row=0, column=0, sticky="nsew")
+
+    # Create a smaller font for the documentation viewer to avoid overly large text
+    try:
+        import tkinter.font as tkfont
+
+        _docs_font = tkfont.nametofont("TkDefaultFont").copy()
+        _docs_font.configure(size=max(_docs_font.cget("size") - 2, 8))
+    except Exception:
+        _docs_font = None
+
+    # initial pixel size used for HTML rendering (can be adjusted by user)
+    _docs_font_px = int(_docs_font.cget("size")) if _docs_font is not None else 12
+
+    def _wrap_html_small(html: str) -> str:
+        # Wrap rendered HTML in a div that reduces base font-size for better readability
+        if not html:
+            return html
+        return f'<div style="font-size:{_docs_font_px}px;line-height:1.2">{html}</div>'
+
+    # keep track of the last-displayed content so we can re-render when the font changes
+    _docs_state = {"html": "", "text": ""}
 
     # Menu: File -> Import, (separator), Exit
     menubar = tk.Menu(root)
@@ -181,7 +215,7 @@ def run_gui():
             alg_var.set(allowed[0])
 
     def _load_algorithm_doc(name: str):
-        """Load the markdown doc for algorithm `name` and display in docs_text."""
+        """Load the markdown doc for algorithm `name` and display in the docs view."""
         try:
             repo_root = Path(__file__).resolve().parents[2]
             doc_paths = [
@@ -195,17 +229,62 @@ def run_gui():
                     content = p.read_text(encoding="utf-8")
                     break
             if content is None:
-                docs_text.delete("1.0", "end")
-                docs_text.insert(
-                    "1.0",
-                    f"No documentation found for '{name}'.\nSearched: {doc_paths}",
-                )
+                if _MD_HTML_AVAILABLE:
+                    try:
+                        not_found_html = _wrap_html_small(
+                            f"<pre>No documentation found for '{name}'.</pre>"
+                        )
+                        docs_view.set_html(not_found_html)
+                    except Exception:
+                        # fallback to plain text if HTMLLabel doesn't support set_html
+                        docs_view.delete("1.0", "end")
+                        msg1 = "No documentation found for '{}'.".format(name)
+                        msg2 = "Searched: " + str(doc_paths)
+                        docs_view.insert("1.0", msg1 + "\n" + msg2)
+                else:
+                    docs_view.delete("1.0", "end")
+                    docs_view.insert(
+                        "1.0",
+                        f"No documentation found for '{name}'.\nSearched: {doc_paths}",
+                    )
                 return
-            docs_text.delete("1.0", "end")
-            docs_text.insert("1.0", content)
+
+            if _MD_HTML_AVAILABLE:
+                try:
+                    html = markdown.markdown(
+                        content, extensions=["fenced_code", "tables"]
+                    )
+                except Exception:
+                    html = markdown.markdown(content) if markdown else ""
+                try:
+                    _docs_state["html"] = html
+                    docs_view.set_html(_wrap_html_small(html))
+                except Exception:
+                    # If set_html not available, replace widget with plain text view
+                    docs_view.delete("1.0", "end")
+                    docs_view.insert("1.0", content)
+            else:
+                docs_view.delete("1.0", "end")
+                _docs_state["text"] = content
+                docs_view.insert("1.0", content)
+                docs_view.insert(
+                    "end",
+                    "\n\nInstall 'markdown' and 'tkhtmlview' to render formatted docs.",
+                )
         except Exception as exc:
-            docs_text.delete("1.0", "end")
-            docs_text.insert("1.0", f"Error loading docs for '{name}': {exc}")
+            if _MD_HTML_AVAILABLE:
+                try:
+                    docs_view.set_html(
+                        _wrap_html_small(
+                            f"<pre>Error loading docs for '{name}': {exc}</pre>"
+                        )
+                    )
+                except Exception:
+                    docs_view.delete("1.0", "end")
+                    docs_view.insert("1.0", f"Error loading docs for '{name}': {exc}")
+            else:
+                docs_view.delete("1.0", "end")
+                docs_view.insert("1.0", f"Error loading docs for '{name}': {exc}")
 
     repeat_var = tk.IntVar(value=3)
     ttk.Label(frm, text="Repeat (for timing):").grid(row=2, column=2, sticky="w")
@@ -224,11 +303,117 @@ def run_gui():
     docs_frame = ttk.Frame(frm)
     docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
     ttk.Label(docs_frame, text="Algorithm docs:").grid(row=0, column=0, sticky="w")
-    docs_text = tk.Text(docs_frame, height=30, width=60, wrap="word")
-    docs_text.grid(row=1, column=0, sticky="nsew")
-    docs_scroll = ttk.Scrollbar(docs_frame, orient="vertical", command=docs_text.yview)
-    docs_text.configure(yscrollcommand=docs_scroll.set)
-    docs_scroll.grid(row=1, column=1, sticky="ns")
+    # Font size control for docs viewer
+    docs_font_size_var = tk.IntVar(value=_docs_font_px)
+    ttk.Label(docs_frame, text="Font size:").grid(
+        row=0, column=1, sticky="e", padx=(8, 0)
+    )
+    docs_size_spin = tk.Spinbox(
+        docs_frame,
+        from_=8,
+        to=36,
+        width=4,
+        textvariable=docs_font_size_var,
+        justify="center",
+    )
+    docs_size_spin.grid(row=0, column=2, sticky="e", padx=(4, 0))
+
+    def _set_docs_font_size(val):
+        nonlocal _docs_font_px, _docs_font, _docs_state
+        try:
+            size = int(val)
+        except Exception:
+            return
+        _docs_font_px = size
+        try:
+            if _docs_font is not None:
+                _docs_font.configure(size=size)
+            # apply to current widget if present
+            try:
+                docs_view.configure(font=_docs_font)
+            except Exception:
+                pass
+        except Exception:
+            pass
+        # Re-apply currently shown content with the new size
+        try:
+            if _MD_HTML_AVAILABLE and _docs_state.get("html"):
+                docs_view.set_html(_wrap_html_small(_docs_state.get("html")))
+            elif not _MD_HTML_AVAILABLE and _docs_state.get("text"):
+                docs_view.delete("1.0", "end")
+                docs_view.insert("1.0", _docs_state.get("text"))
+        except Exception:
+            pass
+
+    # invoke when spinbox value changes
+    docs_size_spin.configure(
+        command=lambda: _set_docs_font_size(docs_font_size_var.get())
+    )
+    # If markdown rendering libs are missing, show install hint and button
+    if not _MD_HTML_AVAILABLE:
+        hint_frame = ttk.Frame(docs_frame)
+        hint_frame.grid(row=0, column=1, sticky="e")
+        ttk.Label(
+            hint_frame, text="(Install markdown+tkhtmlview for formatted docs)"
+        ).pack(side="left")
+
+        def _install_md_pkgs():
+            try:
+                messagebox.showinfo(
+                    "Install",
+                    "Installing markdown and tkhtmlview. This may take a moment.",
+                )
+                args = [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "markdown",
+                    "tkhtmlview",
+                ]
+                subprocess.check_call(args)
+                install_done_msg = (
+                    "Installation complete. Please restart the application to "
+                    "enable formatted docs."
+                )
+                messagebox.showinfo("Install", install_done_msg)
+            except Exception as exc:
+                messagebox.showerror("Install failed", str(exc))
+
+        ttk.Button(hint_frame, text="Install", command=_install_md_pkgs).pack(
+            side="left", padx=(6, 0)
+        )
+    # Create a content area. Use HTML rendering when available; otherwise Text fallback
+    docs_content = ttk.Frame(docs_frame)
+    docs_content.grid(row=1, column=0, sticky="nsew")
+    if _MD_HTML_AVAILABLE:
+        # HTMLLabel: attempt to apply font and wrap HTML on set
+        docs_view = HTMLLabel(docs_content, html="", width=60)
+        docs_view.grid(row=0, column=0, sticky="nsew")
+        try:
+            if _docs_font is not None:
+                docs_view.configure(font=_docs_font)
+        except Exception:
+            pass
+        try:
+            docs_scroll = ttk.Scrollbar(
+                docs_content, orient="vertical", command=docs_view.yview
+            )
+            docs_view.configure(yscrollcommand=docs_scroll.set)
+            docs_scroll.grid(row=0, column=1, sticky="ns")
+        except Exception:
+            # HTMLLabel may not support yview; ignore scrollbar in that case
+            pass
+    else:
+        docs_view = tk.Text(
+            docs_content, height=30, width=60, wrap="word", font=_docs_font
+        )
+        docs_view.grid(row=0, column=0, sticky="nsew")
+        docs_scroll = ttk.Scrollbar(
+            docs_content, orient="vertical", command=docs_view.yview
+        )
+        docs_view.configure(yscrollcommand=docs_scroll.set)
+        docs_scroll.grid(row=0, column=1, sticky="ns")
 
     time_label = ttk.Label(frm, text="Last sort: N/A")
     time_label.grid(row=6, column=0, columnspan=2, sticky="w", pady=(6, 0))
@@ -247,6 +432,56 @@ def run_gui():
             )
     except Exception:
         pass
+
+    # Help menu with Help and Changelog entries
+    help_menu = tk.Menu(menubar, tearoff=0)
+
+    def _show_help():
+        try:
+            repo_root = Path(__file__).resolve().parents[2]
+            p = repo_root / "README.md"
+            if not p.exists():
+                messagebox.showinfo("Help", "README.md not found in repository.")
+                return
+            content = p.read_text(encoding="utf-8")
+            if _MD_HTML_AVAILABLE and markdown:
+                html = markdown.markdown(content, extensions=["fenced_code", "tables"])
+                try:
+                    docs_view.set_html(_wrap_html_small(html))
+                    return
+                except Exception:
+                    pass
+            docs_view.delete("1.0", "end")
+            docs_view.insert("1.0", content)
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+
+    def _show_changelog():
+        try:
+            repo_root = Path(__file__).resolve().parents[2]
+            p = repo_root / "CHANGELOG.md"
+            if not p.exists():
+                messagebox.showinfo(
+                    "Changelog", "CHANGELOG.md not found in repository."
+                )
+                return
+            content = p.read_text(encoding="utf-8")
+            if _MD_HTML_AVAILABLE and markdown:
+                html = markdown.markdown(content, extensions=["fenced_code", "tables"])
+                try:
+                    docs_view.set_html(_wrap_html_small(html))
+                    return
+                except Exception:
+                    pass
+            docs_view.delete("1.0", "end")
+            docs_view.insert("1.0", content)
+        except Exception as exc:
+            messagebox.showerror("Error", str(exc))
+
+    help_menu.add_command(label="Changelog", command=_show_changelog)
+    help_menu.add_separator()
+    help_menu.add_command(label="Help", command=_show_help)
+    menubar.add_cascade(label="Help", menu=help_menu)
 
     def do_sort():
         txt = input_text.get("1.0", "end")

@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [ { name = "Giovanni Lauria", email = "giovanni.lauria@gmail.com" } ]
-dependencies = []
+dependencies = [
+    "Markdown",
+    "tkhtmlview",
+]
 
 # Current project status: Beta/early-stable. Core features implemented (algorithms,
 # CLI, GUI, tests, packaging guidance and CI). Ongoing work: release automation
