@@ -127,6 +127,13 @@ sortItOut --gui
 The GUI uses Tkinter (part of the Python standard library) and requires no
 additional dependencies.
 
+Default behaviour
+-----------------
+
+If `sortItOut` is invoked with no arguments (just `sortItOut`), the program
+will open the graphical interface by default. Pass CLI flags (for example
+`-i` or `-s`) to use the command-line mode instead.
+
 Programmatic API
 -----------------
 
