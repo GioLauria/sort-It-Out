@@ -8,40 +8,9 @@ from __future__ import annotations
 import time
 import tkinter as tk
 from tkinter import messagebox, ttk
-from typing import Callable, List
 
-from . import (
-    bubble_sort,
-    bucket_sort,
-    cocktail_sort,
-    comb_sort,
-    counting_sort,
-    gnome_sort,
-    heap_sort,
-    insertion_sort,
-    merge_sort,
-    quick_sort,
-    radix_sort,
-    selection_sort,
-    shell_sort,
-)
+from .algorithms import ALGORITHMS
 from .sorts import time_sort
-
-ALGORITHMS: dict[str, Callable[[List], List]] = {
-    "bubble": bubble_sort,
-    "quick": quick_sort,
-    "merge": merge_sort,
-    "selection": selection_sort,
-    "insertion": insertion_sort,
-    "heap": heap_sort,
-    "shell": shell_sort,
-    "counting": counting_sort,
-    "radix": radix_sort,
-    "bucket": bucket_sort,
-    "comb": comb_sort,
-    "cocktail": cocktail_sort,
-    "gnome": gnome_sort,
-}
 
 
 def _parse_value(s: str):
