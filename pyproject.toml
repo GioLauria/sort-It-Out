@@ -5,12 +5,23 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sort-it-out"
 version = "0.1.0"
-description = "SortItOut — small utility project for sorting helpers and examples."
+description = "SortItOut — a small educational collection of handwritten sorting
+algorithms, CLI and GUI tooling, and timing helpers for benchmarking."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [ { name = "Giovanni Lauria", email = "giovanni.lauria@gmail.com" } ]
 dependencies = []
+
+# Current project status: Beta/early-stable. Core features implemented (algorithms,
+# CLI, GUI, tests, packaging guidance and CI). Ongoing work: release automation
+# robustness, Windows executable artifacts and packaging improvements.
+classifiers = [
+	"Development Status :: 4 - Beta",
+	"License :: OSI Approved :: MIT License",
+	"Programming Language :: Python :: 3",
+	"Topic :: Education",
+]
 
 [project.scripts]
 sortItOut = "sort_it_out.cli:main"

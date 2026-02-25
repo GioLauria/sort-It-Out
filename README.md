@@ -6,6 +6,29 @@ algorithms in pure Python and provides simple timing helpers to benchmark
 them on custom datasets. Implementations live in the `sort_it_out` package
 and are intentionally handwritten (no external sorting libraries are used).
 
+Supported algorithms
+--------------------
+
+The project currently provides these sorting algorithms (click an algorithm
+to open its documentation page under the `docs/` folder):
+
+- [Bubble Sort](docs/alghorythms/bubble.md)
+- [Quick Sort](docs/alghorythms/quick.md)
+- [Merge Sort](docs/alghorythms/merge.md)
+- [Selection Sort](docs/alghorythms/selection.md)
+- [Insertion Sort](docs/alghorythms/insertion.md)
+- [Heap Sort](docs/alghorythms/heap.md)
+- [Shell Sort](docs/alghorythms/shell.md)
+- [Counting Sort](docs/alghorythms/counting.md)
+- [Radix Sort](docs/alghorythms/radix.md)
+- [Bucket Sort](docs/alghorythms/bucket.md)
+- [Comb Sort](docs/alghorythms/comb.md)
+- [Cocktail Sort](docs/alghorythms/cocktail.md)
+- [Gnome Sort](docs/alghorythms/gnome.md)
+
+Each docs page contains a short explanation, complexity notes and example
+usage for the corresponding algorithm.
+
 Author: Giovanni Lauria <giovanni.lauria@gmail.com>
 
 Getting started
