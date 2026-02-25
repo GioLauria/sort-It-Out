@@ -40,7 +40,26 @@ __all__ = [
     "run",
 ]
 
-__version__ = "0.1.0"
+# Version handling: prefer a generated `_version.py` created by setuptools_scm
+# at build/install time, otherwise try to read the latest git tag. Falls back
+# to a sensible default if neither is available.
+try:
+    from ._version import version as __version__  # type: ignore
+except Exception:
+    import os
+    import subprocess
+
+    def _git_tag_version():
+        try:
+            git = os.environ.get("GIT", "git")
+            args = [git, "describe", "--tags", "--abbrev=0"]
+            out = subprocess.check_output(args, stderr=subprocess.DEVNULL)
+            tag = out.decode().strip()
+            return tag[1:] if tag.startswith("v") else tag
+        except Exception:
+            return "0.0.0"
+
+    __version__ = _git_tag_version()
 
 
 def run(argv: list | None = None) -> int:

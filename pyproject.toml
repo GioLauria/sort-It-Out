@@ -1,12 +1,11 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "sort-it-out"
 version = "0.1.0"
-description = "SortItOut — a small educational collection of handwritten sorting
-algorithms, CLI and GUI tooling, and timing helpers for benchmarking."
+description = "SortItOut — a small educational collection of handwritten sorting algorithms, CLI and GUI tooling, and timing helpers for benchmarking."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -17,10 +16,10 @@ dependencies = []
 # CLI, GUI, tests, packaging guidance and CI). Ongoing work: release automation
 # robustness, Windows executable artifacts and packaging improvements.
 classifiers = [
-	"Development Status :: 4 - Beta",
-	"License :: OSI Approved :: MIT License",
-	"Programming Language :: Python :: 3",
-	"Topic :: Education",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Education",
 ]
 
 [project.scripts]
@@ -36,6 +35,11 @@ testpaths = ["tests"]
 
 [tool.black]
 line-length = 88
+
+[tool.setuptools_scm]
+write_to = "src/sort_it_out/_version.py"
+version_scheme = "post-release"
+local_scheme = "no-local-version"
 
 [tool.flake8]
 max-line-length = 88
