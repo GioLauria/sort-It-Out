@@ -84,6 +84,24 @@ def run_gui():
     input_text.configure(yscrollcommand=input_scroll.set)
     input_scroll.grid(row=1, column=3, sticky="ns", pady=(2, 8))
 
+    def _on_input_modified(event=None):
+        # Update items count live when the Text widget is modified
+        try:
+            txt = input_text.get("1.0", "end")
+            count = len(_parse_input(txt))
+            items_label.config(text=f"Items: {count}")
+        except Exception:
+            items_label.config(text="Items: 0")
+        finally:
+            # Reset the modified flag to continue receiving events
+            try:
+                input_text.edit_modified(False)
+            except Exception:
+                pass
+
+    # Bind to the Text modified virtual event so the count updates as user types/pastes
+    input_text.bind("<<Modified>>", lambda e: _on_input_modified())
+
     # Algorithm label + selector inline
     alg_frame = ttk.Frame(frm)
     alg_frame.grid(row=2, column=0, columnspan=2, sticky="w")
