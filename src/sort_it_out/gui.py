@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import time
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from . import __version__
@@ -49,6 +50,7 @@ def run_gui():
     # Menu: File -> Import, (separator), Exit
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
+    alg_menu_top = tk.Menu(menubar, tearoff=0)
 
     def _import_file():
         path = filedialog.askopenfilename(
@@ -82,6 +84,7 @@ def run_gui():
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=_exit_app)
     menubar.add_cascade(label="File", menu=file_menu)
+    menubar.add_cascade(label="Algorithms", menu=alg_menu_top)
     root.config(menu=menubar)
 
     ttk.Label(frm, text="Input (one value per line or comma-separated):").grid(
@@ -177,6 +180,33 @@ def run_gui():
         if alg_var.get() not in allowed:
             alg_var.set(allowed[0])
 
+    def _load_algorithm_doc(name: str):
+        """Load the markdown doc for algorithm `name` and display in docs_text."""
+        try:
+            repo_root = Path(__file__).resolve().parents[2]
+            doc_paths = [
+                repo_root / "docs" / "alghorythms" / f"{name.lower()}.md",
+                repo_root / "docs" / f"{name.lower()}.md",
+                repo_root / "docs" / "alghorythms" / "index.md",
+            ]
+            content = None
+            for p in doc_paths:
+                if p.exists():
+                    content = p.read_text(encoding="utf-8")
+                    break
+            if content is None:
+                docs_text.delete("1.0", "end")
+                docs_text.insert(
+                    "1.0",
+                    f"No documentation found for '{name}'.\nSearched: {doc_paths}",
+                )
+                return
+            docs_text.delete("1.0", "end")
+            docs_text.insert("1.0", content)
+        except Exception as exc:
+            docs_text.delete("1.0", "end")
+            docs_text.insert("1.0", f"Error loading docs for '{name}': {exc}")
+
     repeat_var = tk.IntVar(value=3)
     ttk.Label(frm, text="Repeat (for timing):").grid(row=2, column=2, sticky="w")
     repeat_entry = ttk.Entry(frm, textvariable=repeat_var, width=6)
@@ -190,6 +220,16 @@ def run_gui():
     output_text.configure(yscrollcommand=output_scroll.set)
     output_scroll.grid(row=4, column=3, sticky="ns", pady=(2, 8))
 
+    # Documentation viewer on the right
+    docs_frame = ttk.Frame(frm)
+    docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
+    ttk.Label(docs_frame, text="Algorithm docs:").grid(row=0, column=0, sticky="w")
+    docs_text = tk.Text(docs_frame, height=30, width=60, wrap="word")
+    docs_text.grid(row=1, column=0, sticky="nsew")
+    docs_scroll = ttk.Scrollbar(docs_frame, orient="vertical", command=docs_text.yview)
+    docs_text.configure(yscrollcommand=docs_scroll.set)
+    docs_scroll.grid(row=1, column=1, sticky="ns")
+
     time_label = ttk.Label(frm, text="Last sort: N/A")
     time_label.grid(row=6, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
@@ -198,6 +238,15 @@ def run_gui():
 
     # Initialize algorithm menu to show all algorithms
     _update_alg_menu_for([])
+
+    # Populate the Algorithms top-level menu so users can open docs
+    try:
+        for name in sorted(ALGORITHMS.keys()):
+            alg_menu_top.add_command(
+                label=name, command=lambda n=name: _load_algorithm_doc(n)
+            )
+    except Exception:
+        pass
 
     def do_sort():
         txt = input_text.get("1.0", "end")
