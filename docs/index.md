@@ -38,6 +38,15 @@ pip install -e .
 pip install -r requirements-dev.txt
 ```
 
+4. (Optional but recommended) Install and enable pre-commit hooks.
+
+```powershell
+pip install pre-commit
+pre-commit install
+# Run all hooks once locally
+pre-commit run --all-files
+```
+
 3. Run tests.
 
 ```powershell

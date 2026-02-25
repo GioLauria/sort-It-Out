@@ -16,6 +16,15 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+Optional: install and enable `pre-commit` hooks to run formatters and checks
+locally before commits:
+
+```powershell
+pip install pre-commit
+pre-commit install
+pre-commit run --all-files
+```
+
 Usage
 -
 You can import and use the sorting helpers to benchmark algorithms on a
