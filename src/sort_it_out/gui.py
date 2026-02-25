@@ -5,6 +5,7 @@ algorithm and view the sorted output or timing results.
 """
 from __future__ import annotations
 
+import time
 import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Callable, List
@@ -91,6 +92,9 @@ def run_gui():
     output_text = tk.Text(frm, height=10, width=60)
     output_text.grid(row=4, column=0, columnspan=4, pady=(2, 8))
 
+    time_label = ttk.Label(frm, text="Last sort: N/A")
+    time_label.grid(row=6, column=0, columnspan=2, sticky="w", pady=(6, 0))
+
     def do_sort():
         txt = input_text.get("1.0", "end")
         data = _parse_input(txt)
@@ -100,12 +104,16 @@ def run_gui():
             messagebox.showerror("Error", f"Unknown algorithm: {alg_name}")
             return
         try:
+            t0 = time.perf_counter()
             res = alg(data)
+            t1 = time.perf_counter()
+            elapsed = t1 - t0
         except Exception as exc:
             messagebox.showerror("Error while sorting", str(exc))
             return
         output_text.delete("1.0", "end")
         output_text.insert("1.0", "\n".join(str(x) for x in res))
+        time_label.config(text=f"Last sort: {elapsed:.6f} sec")
 
     def do_time():
         txt = input_text.get("1.0", "end")
@@ -126,6 +134,7 @@ def run_gui():
             return
         output_text.delete("1.0", "end")
         output_text.insert("1.0", f"{alg_name}: {t:.6f} sec (avg over {rep} runs)")
+        time_label.config(text=f"Last timed: {t:.6f} sec (avg)")
 
     btn_sort = ttk.Button(frm, text="Sort", command=do_sort)
     btn_sort.grid(row=5, column=0, sticky="w")
