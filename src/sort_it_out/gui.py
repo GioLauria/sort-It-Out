@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import time
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 
 from .algorithms import ALGORITHMS
 from .sorts import time_sort
@@ -39,6 +39,35 @@ def run_gui():
 
     frm = ttk.Frame(root, padding=10)
     frm.grid(row=0, column=0, sticky="nsew")
+
+    # Menu: File -> Import, (separator), Exit
+    menubar = tk.Menu(root)
+    file_menu = tk.Menu(menubar, tearoff=0)
+
+    def _import_file():
+        path = filedialog.askopenfilename(
+            title="Import data file",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+        )
+        if not path:
+            return
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                content = fh.read()
+        except Exception as exc:
+            messagebox.showerror("Import error", str(exc))
+            return
+        input_text.delete("1.0", "end")
+        input_text.insert("1.0", content)
+
+    def _exit_app():
+        root.quit()
+
+    file_menu.add_command(label="Import", command=_import_file)
+    file_menu.add_separator()
+    file_menu.add_command(label="Exit", command=_exit_app)
+    menubar.add_cascade(label="File", menu=file_menu)
+    root.config(menu=menubar)
 
     ttk.Label(frm, text="Input (one value per line or comma-separated):").grid(
         row=0, column=0, sticky="w"
