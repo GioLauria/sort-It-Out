@@ -264,7 +264,3 @@ Recent updates made to the repository (what changed and where to look):
 - **Tooling & quality:** Pre-commit hooks (Black, isort, flake8) and
     a test suite (pytest) are included. Tests and hooks run locally via the
     developer instructions in this README and `CONTRIBUTING.md`.
-
-If you'd like, I can also add a short release checklist to the docs that
-shows the steps we use to build artifacts, tag releases and publish
-packages (PyPI or GitHub Packages). Let me know if you want that.

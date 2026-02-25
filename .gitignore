@@ -30,3 +30,6 @@ sortItOut.spec
 .DS_Store
 Thumbs.db
 ~$*
+
+# Internal Samples
+data.*
