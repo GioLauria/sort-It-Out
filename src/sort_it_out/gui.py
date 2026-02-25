@@ -306,10 +306,11 @@ def run_gui():
     docs_frame.grid(row=0, column=4, rowspan=9, sticky="nsew", padx=(12, 0))
     # Place Item Details label aligned with the docs content (col 0)
     ttk.Label(docs_frame, text="Item Details").grid(row=0, column=0, sticky="w")
-    # Move font controls to the right of the label (cols 1-2)
+    # Place Font size label in the same column (col 0) but right-aligned;
+    # spinbox sits in col 1 (next row)
     docs_font_size_var = tk.IntVar(value=_docs_font_px)
     ttk.Label(docs_frame, text="Font size:").grid(
-        row=0, column=1, sticky="e", padx=(8, 0)
+        row=1, column=0, sticky="e", padx=(0, 6)
     )
     docs_size_spin = tk.Spinbox(
         docs_frame,
@@ -319,7 +320,7 @@ def run_gui():
         textvariable=docs_font_size_var,
         justify="center",
     )
-    docs_size_spin.grid(row=0, column=2, sticky="w", padx=(4, 0))
+    docs_size_spin.grid(row=1, column=1, sticky="w")
 
     def _set_docs_font_size(val):
         nonlocal _docs_font_px, _docs_font, _docs_state
