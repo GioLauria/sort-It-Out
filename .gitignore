@@ -13,6 +13,9 @@ dist/
 build/
 *.egg-info/
 
+# PyInstaller spec
+sortItOut.spec
+
 # Pytest
 .pytest_cache/
 
