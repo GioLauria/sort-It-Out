@@ -9,6 +9,19 @@ semantic versioning.
 
 - Minor documentation updates and metadata improvements.
 
+## [0.2.0] - 2026-02-25
+
+- GUI: added File menu (Import, Exit), Clear button, scrollbars, and live
+  items count that supports newline- or comma-separated input.
+- GUI: algorithm selector now shows only algorithms that support the
+  current input data types (integer-only, float-in-[0,1), homogeneous
+  strings, etc.).
+- Refactor: centralized algorithm registry in `src/sort_it_out/algorithms.py`.
+- API/CLI: algorithm names use canonical capitalized names (e.g. `Merge`,
+  `Quick`); CLI accepts case-insensitive lookup for backward compatibility.
+- Docs: README and docs updated to use canonical algorithm names and
+  document new GUI features.
+
 ## [0.1.3] - 2026-02-25
 
 - CI: pushed tag `v0.1.3` (triggered release workflow).
