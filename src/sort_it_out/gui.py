@@ -389,7 +389,8 @@ def run_gui():
         )
     # Create a content area. Use HTML rendering when available; otherwise Text fallback
     docs_content = ttk.Frame(docs_frame)
-    docs_content.grid(row=1, column=0, sticky="nsew")
+    # place content below the header (Item Details) and font controls
+    docs_content.grid(row=2, column=0, columnspan=2, sticky="nsew")
     if _MD_HTML_AVAILABLE:
         # HTMLLabel: attempt to apply font and wrap HTML on set
         docs_view = HTMLLabel(docs_content, html="", width=60)
