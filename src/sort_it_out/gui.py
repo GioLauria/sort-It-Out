@@ -59,6 +59,12 @@ def run_gui():
             return
         input_text.delete("1.0", "end")
         input_text.insert("1.0", content)
+        # update items count
+        try:
+            count = len(_parse_input(content))
+        except Exception:
+            count = 0
+        items_label.config(text=f"Items: {count}")
 
     def _exit_app():
         root.quit()
@@ -74,6 +80,9 @@ def run_gui():
     )
     input_text = tk.Text(frm, height=10, width=60)
     input_text.grid(row=1, column=0, columnspan=3, pady=(2, 8))
+    input_scroll = ttk.Scrollbar(frm, orient="vertical", command=input_text.yview)
+    input_text.configure(yscrollcommand=input_scroll.set)
+    input_scroll.grid(row=1, column=3, sticky="ns", pady=(2, 8))
 
     ttk.Label(frm, text="Algorithm:").grid(row=2, column=0, sticky="w")
     alg_var = tk.StringVar(value="merge")
@@ -88,14 +97,21 @@ def run_gui():
     output_label = ttk.Label(frm, text="Output:")
     output_label.grid(row=3, column=0, sticky="w", pady=(8, 0))
     output_text = tk.Text(frm, height=10, width=60)
-    output_text.grid(row=4, column=0, columnspan=4, pady=(2, 8))
+    output_text.grid(row=4, column=0, columnspan=3, pady=(2, 8))
+    output_scroll = ttk.Scrollbar(frm, orient="vertical", command=output_text.yview)
+    output_text.configure(yscrollcommand=output_scroll.set)
+    output_scroll.grid(row=4, column=3, sticky="ns", pady=(2, 8))
 
     time_label = ttk.Label(frm, text="Last sort: N/A")
     time_label.grid(row=6, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
+    items_label = ttk.Label(frm, text="Items: 0")
+    items_label.grid(row=6, column=2, columnspan=2, sticky="w", pady=(6, 0))
+
     def do_sort():
         txt = input_text.get("1.0", "end")
         data = _parse_input(txt)
+        items_label.config(text=f"Items: {len(data)}")
         alg_name = alg_var.get()
         alg = ALGORITHMS.get(alg_name)
         if not alg:
@@ -116,6 +132,7 @@ def run_gui():
     def do_time():
         txt = input_text.get("1.0", "end")
         data = _parse_input(txt)
+        items_label.config(text=f"Items: {len(data)}")
         alg_name = alg_var.get()
         alg = ALGORITHMS.get(alg_name)
         if not alg:
