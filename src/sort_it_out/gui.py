@@ -9,6 +9,7 @@ import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
+from . import __version__
 from .algorithms import ALGORITHMS, ALGORITHMS_LOWER
 from .sorts import time_sort
 
@@ -35,7 +36,12 @@ def _parse_input(text: str):
 
 def run_gui():
     root = tk.Tk()
-    root.title("SortItOut — GUI")
+    # Append release/version to the title when available
+    try:
+        ver = __version__
+    except Exception:
+        ver = "unknown"
+    root.title(f"SortItOut — GUI (v{ver})")
 
     frm = ttk.Frame(root, padding=10)
     frm.grid(row=0, column=0, sticky="nsew")
