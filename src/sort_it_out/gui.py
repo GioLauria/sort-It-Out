@@ -9,9 +9,21 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Callable, List
 
-from . import (bubble_sort, bucket_sort, cocktail_sort, comb_sort,
-               counting_sort, gnome_sort, heap_sort, insertion_sort,
-               merge_sort, quick_sort, radix_sort, selection_sort, shell_sort)
+from . import (
+    bubble_sort,
+    bucket_sort,
+    cocktail_sort,
+    comb_sort,
+    counting_sort,
+    gnome_sort,
+    heap_sort,
+    insertion_sort,
+    merge_sort,
+    quick_sort,
+    radix_sort,
+    selection_sort,
+    shell_sort,
+)
 from .sorts import time_sort
 
 ALGORITHMS: dict[str, Callable[[List], List]] = {

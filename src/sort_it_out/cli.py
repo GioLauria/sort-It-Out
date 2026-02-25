@@ -10,9 +10,22 @@ import argparse
 import sys
 from typing import Callable, Dict, Iterable, List, Optional
 
-from . import (bubble_sort, bucket_sort, cocktail_sort, comb_sort,
-               counting_sort, gnome_sort, gui, heap_sort, insertion_sort,
-               merge_sort, quick_sort, radix_sort, selection_sort, shell_sort)
+from . import (
+    bubble_sort,
+    bucket_sort,
+    cocktail_sort,
+    comb_sort,
+    counting_sort,
+    gnome_sort,
+    gui,
+    heap_sort,
+    insertion_sort,
+    merge_sort,
+    quick_sort,
+    radix_sort,
+    selection_sort,
+    shell_sort,
+)
 from .sorts import time_sort
 
 ALGORITHMS: Dict[str, Callable[[Iterable], List]] = {

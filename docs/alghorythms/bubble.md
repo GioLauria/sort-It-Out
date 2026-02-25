@@ -28,4 +28,3 @@ print(bubble_sort([3,1,2]))
 
 Implementation
 - Provided as `bubble_sort` in the `sort_it_out` package.
-

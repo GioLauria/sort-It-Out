@@ -2,10 +2,21 @@ import random
 
 import pytest
 
-from sort_it_out import (bubble_sort, cocktail_sort, comb_sort, counting_sort,
-                         gnome_sort, heap_sort, insertion_sort, merge_sort,
-                         quick_sort, radix_sort, selection_sort, shell_sort,
-                         time_sort)
+from sort_it_out import (
+    bubble_sort,
+    cocktail_sort,
+    comb_sort,
+    counting_sort,
+    gnome_sort,
+    heap_sort,
+    insertion_sort,
+    merge_sort,
+    quick_sort,
+    radix_sort,
+    selection_sort,
+    shell_sort,
+    time_sort,
+)
 
 
 @pytest.mark.parametrize(

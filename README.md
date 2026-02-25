@@ -127,3 +127,14 @@ sortItOut --gui
 The GUI uses Tkinter (part of the Python standard library) and requires no
 additional dependencies.
 
+Programmatic API
+-----------------
+
+You can invoke the tool programmatically from other Python code. Import the
+package and call `run()` with an argv-like list to execute the CLI logic and
+receive the CLI exit code. Example:
+
+```python
+import sort_it_out
+exit_code = sort_it_out.run(["-s", "bubble", "-i", "data.txt"])
+```

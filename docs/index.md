@@ -1,6 +1,6 @@
 # SortItOut — Documentation
 
-Welcome to the SortItOut documentation. This page provides a concise, 
+Welcome to the SortItOut documentation. This page provides a concise,
 logical overview of the project, how to get started, and where to look for
 further details.
 
@@ -83,6 +83,17 @@ See the full algorithm reference in the `alghorythms` section:
 
 - [Algorithms reference](alghorythms/index.md)
 
+Programmatic API
+---------------
+
+The package exposes a simple programmatic entrypoint `sort_it_out.run(argv)`
+which runs the same CLI logic from Python. Example:
+
+```python
+import sort_it_out
+sort_it_out.run(["-s", "merge", "-i", "data.txt"])
+```
+
 Add additional algorithm modules under `src/sort_it_out/` and export them
 from `src/sort_it_out/__init__.py` to make them available for benchmarking.
 
@@ -108,4 +119,3 @@ from `src/sort_it_out/__init__.py` to make them available for benchmarking.
 
 This project is released under the MIT license (see the repository
 `LICENSE` file).
-
