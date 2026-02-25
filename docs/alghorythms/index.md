@@ -19,3 +19,10 @@ Available algorithms
 - [Comb Sort](comb.md)
 - [Cocktail Sort](cocktail.md)
 - [Gnome Sort](gnome.md)
+
+Notes
+-----
+
+- Each algorithm page links to usage examples and complexity notes. The
+	CLI accepts algorithm short names (e.g. `gnome`, `merge`, `quick`) and
+	these are the canonical names exported by the package for benchmarking.

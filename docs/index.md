@@ -73,6 +73,23 @@ results = compare_algorithms(algos, data, repeat=5)
 print(results)
 ```
 
+CLI notes
+---------
+
+- The CLI supports reading input from a file or stdin and can write sorted
+	results to a file using the `-o/--output` option. Example:
+
+```bash
+sortItOut -i data.txt -s gnome -o sorted.txt
+```
+
+Versioning
+----------
+
+- The package version is produced by `setuptools_scm` from git tags when
+	building/installing the package. At runtime the package prefers the
+	generated `_version.py` and otherwise attempts to read the latest git tag.
+
 ## Algorithms included
 
 - `bubble_sort` — simple O(n^2) comparison sort; useful for demonstrations.

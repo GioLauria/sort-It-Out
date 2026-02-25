@@ -14,6 +14,11 @@ Public functions:
 - `compare_algorithms(algorithms: Dict[str, Callable[[Iterable], List]], data: Iterable, repeat: int = 3) -> Dict[str, float]` — Run timing for each algorithm and return mapping `name -> avg_seconds`.
 - `selection_sort`, `insertion_sort`, `heap_sort`, `shell_sort`, `counting_sort`, `radix_sort`, `bucket_sort`, `comb_sort`, `cocktail_sort`, `gnome_sort` — Additional handwritten implementations included in the package. See `src/sort_it_out/sorts.py` for details.
 
+## Module: `sort_it_out` (package-level)
+
+- `__version__` — Package version. When installed from source the project uses `setuptools_scm` to generate `src/sort_it_out/_version.py` from git tags; at runtime the package prefers the generated value and falls back to the latest git tag or `0.0.0` when necessary.
+- `run(argv: Optional[List[str]] = None) -> int` — Programmatic entrypoint that runs the same CLI logic used by the `sortItOut` console script. Callers can pass an argv-like list (e.g. `['-s','merge','-i','data.txt']`) and receive an integer exit code.
+
 Notes:
 
 - All sorting functions return new lists and do not modify the input.
