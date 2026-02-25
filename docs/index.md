@@ -1,7 +1,96 @@
-# Documentation
+# SortItOut — Documentation
 
-This is the documentation index for the project template. Replace or expand these pages for your project.
+Welcome to the SortItOut documentation. This page provides a concise, 
+logical overview of the project, how to get started, and where to look for
+further details.
 
-- docs/api/
-- docs/guides/
-- docs/architecture/
+## Overview
+
+SortItOut benchmarks sorting algorithms on custom datasets and reports
+average execution times. The project includes a small suite of sorting
+implementations, timing utilities, and example tests.
+
+## Goals
+
+- Provide simple, readable implementations of common sorting algorithms.
+- Offer timing helpers to measure algorithm performance on custom datasets.
+- Make it easy to add new algorithms and datasets for benchmarking.
+
+## Project layout
+
+- `src/sort_it_out/` — package code (sorting algorithms, timing helpers).
+- `tests/` — unit tests and test helpers.
+- `docs/` — documentation (this file).
+
+## Getting started
+
+1. Create and activate a virtual environment.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+2. Install in editable mode and development requirements.
+
+```powershell
+pip install -e .
+pip install -r requirements-dev.txt
+```
+
+3. Run tests.
+
+```powershell
+pytest
+```
+
+## Usage examples
+
+Basic usage to sort and benchmark a small dataset:
+
+```python
+from sort_it_out import bubble_sort, merge_sort, compare_algorithms
+
+data = [5, 3, 2, 4, 1]
+print(bubble_sort(data))
+
+algos = {
+		"bubble": bubble_sort,
+		"merge": merge_sort,
+}
+results = compare_algorithms(algos, data, repeat=5)
+print(results)
+```
+
+## Algorithms included
+
+- `bubble_sort` — simple O(n^2) comparison sort; useful for demonstrations.
+- `quick_sort` — recursive quicksort with middle pivot; average O(n log n).
+- `merge_sort` — classic divide-and-conquer stable sort; O(n log n).
+
+Add additional algorithm modules under `src/sort_it_out/` and export them
+from `src/sort_it_out/__init__.py` to make them available for benchmarking.
+
+## Benchmarking and datasets
+
+- Use `compare_algorithms` to benchmark multiple algorithms on the same
+	dataset. It returns average execution time (seconds) per algorithm.
+- For realistic benchmarking, provide larger datasets and control randomness
+	(e.g., set a PRNG seed or load a deterministic dataset from a file).
+
+## Tests
+
+- Unit tests live in `tests/`. Run them with `pytest`.
+- The test suite includes correctness checks and simple timing checks.
+
+## Contributing
+
+- Add new algorithms as modules in `src/sort_it_out/` with unit tests.
+- Update documentation in `docs/` to describe new features.
+- Follow the existing commit style and sign commits when pushing.
+
+## License
+
+This project is released under the MIT license (see the repository
+`LICENSE` file).
+
