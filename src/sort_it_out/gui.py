@@ -290,7 +290,8 @@ def run_gui():
     # Move Repeat controls to align with input/output columns (left side)
     ttk.Label(frm, text="Repeat (for timing):").grid(row=3, column=0, sticky="w")
     repeat_entry = ttk.Entry(frm, textvariable=repeat_var, width=6)
-    repeat_entry.grid(row=3, column=1, sticky="w")
+    # place the entry so its right edge aligns with the input/output area
+    repeat_entry.grid(row=3, column=2, sticky="e")
 
     output_label = ttk.Label(frm, text="Output:")
     output_label.grid(row=4, column=0, sticky="w", pady=(8, 0))
