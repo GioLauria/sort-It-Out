@@ -306,20 +306,6 @@ def run_gui():
     docs_frame.grid(row=0, column=4, rowspan=9, sticky="nsew", padx=(12, 0))
     # Place Item Details label aligned with the docs content (col 0)
     ttk.Label(docs_frame, text="Item Details").grid(row=0, column=0, sticky="w")
-    # Place Font size label and spinbox on the same row as Item Details
-    docs_font_size_var = tk.IntVar(value=_docs_font_px)
-    ttk.Label(docs_frame, text="Font size:").grid(
-        row=0, column=1, sticky="e", padx=(8, 0)
-    )
-    docs_size_spin = tk.Spinbox(
-        docs_frame,
-        from_=8,
-        to=36,
-        width=4,
-        textvariable=docs_font_size_var,
-        justify="center",
-    )
-    docs_size_spin.grid(row=0, column=2, sticky="w", padx=(4, 0))
 
     def _set_docs_font_size(val):
         nonlocal _docs_font_px, _docs_font, _docs_state
@@ -348,10 +334,7 @@ def run_gui():
         except Exception:
             pass
 
-    # invoke when spinbox value changes
-    docs_size_spin.configure(
-        command=lambda: _set_docs_font_size(docs_font_size_var.get())
-    )
+    # spinbox command is configured where the spinbox is created below
     # If markdown rendering libs are missing, show install hint and button
     if not _MD_HTML_AVAILABLE:
         hint_frame = ttk.Frame(docs_frame)
@@ -404,7 +387,8 @@ def run_gui():
                 docs_content, orient="vertical", command=docs_view.yview
             )
             docs_view.configure(yscrollcommand=docs_scroll.set)
-            docs_scroll.grid(row=0, column=1, sticky="ns")
+            # place scrollbar in column 2 so we can show controls just left of it
+            docs_scroll.grid(row=0, column=2, sticky="ns")
         except Exception:
             # HTMLLabel may not support yview; ignore scrollbar in that case
             pass
@@ -417,7 +401,23 @@ def run_gui():
             docs_content, orient="vertical", command=docs_view.yview
         )
         docs_view.configure(yscrollcommand=docs_scroll.set)
-        docs_scroll.grid(row=0, column=1, sticky="ns")
+        docs_scroll.grid(row=0, column=2, sticky="ns")
+
+    # Add controls frame inside docs_content to hold the font controls
+    controls_frame = ttk.Frame(docs_content)
+    controls_frame.grid(row=0, column=1, sticky="ne", padx=(6, 4))
+    docs_font_size_var = tk.IntVar(value=_docs_font_px)
+    ttk.Label(controls_frame, text="Font size:").pack(side="left")
+    docs_size_spin = tk.Spinbox(
+        controls_frame,
+        from_=8,
+        to=36,
+        width=4,
+        textvariable=docs_font_size_var,
+        justify="center",
+        command=lambda: _set_docs_font_size(docs_font_size_var.get()),
+    )
+    docs_size_spin.pack(side="left", padx=(4, 0))
 
     time_label = ttk.Label(frm, text="Last sort: N/A")
     time_label.grid(row=7, column=0, columnspan=2, sticky="w", pady=(6, 0))
