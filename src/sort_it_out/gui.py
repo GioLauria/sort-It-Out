@@ -9,7 +9,7 @@ import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from .algorithms import ALGORITHMS
+from .algorithms import ALGORITHMS, ALGORITHMS_LOWER
 from .sorts import time_sort
 
 
@@ -88,8 +88,12 @@ def run_gui():
     alg_frame = ttk.Frame(frm)
     alg_frame.grid(row=2, column=0, columnspan=2, sticky="w")
     ttk.Label(alg_frame, text="Algorithm:").pack(side="left")
-    alg_var = tk.StringVar(value="merge")
-    alg_menu = ttk.OptionMenu(alg_frame, alg_var, "merge", *sorted(ALGORITHMS.keys()))
+    # Default to the canonical first algorithm name (capitalized)
+    default_alg = next(iter(sorted(ALGORITHMS.keys())), "Merge")
+    alg_var = tk.StringVar(value=default_alg)
+    alg_menu = ttk.OptionMenu(
+        alg_frame, alg_var, default_alg, *sorted(ALGORITHMS.keys())
+    )
     alg_menu.pack(side="left", padx=(6, 0))
 
     repeat_var = tk.IntVar(value=3)
@@ -115,10 +119,10 @@ def run_gui():
         txt = input_text.get("1.0", "end")
         data = _parse_input(txt)
         items_label.config(text=f"Items: {len(data)}")
-        alg_name = alg_var.get()
-        alg = ALGORITHMS.get(alg_name)
-        if not alg:
-            messagebox.showerror("Error", f"Unknown algorithm: {alg_name}")
+        alg_raw = alg_var.get()
+        alg = ALGORITHMS.get(alg_raw) or ALGORITHMS_LOWER.get(alg_raw.lower())
+        if alg is None:
+            messagebox.showerror("Error", f"Unknown algorithm: {alg_raw}")
             return
         try:
             t0 = time.perf_counter()
@@ -136,11 +140,12 @@ def run_gui():
         txt = input_text.get("1.0", "end")
         data = _parse_input(txt)
         items_label.config(text=f"Items: {len(data)}")
-        alg_name = alg_var.get()
-        alg = ALGORITHMS.get(alg_name)
-        if not alg:
-            messagebox.showerror("Error", f"Unknown algorithm: {alg_name}")
+        alg_raw = alg_var.get()
+        alg = ALGORITHMS.get(alg_raw) or ALGORITHMS_LOWER.get(alg_raw.lower())
+        if alg is None:
+            messagebox.showerror("Error", f"Unknown algorithm: {alg_raw}")
             return
+        display_name = next((n for n, f in ALGORITHMS.items() if f is alg), alg_raw)
         try:
             rep = int(repeat_var.get())
         except Exception:
@@ -151,7 +156,7 @@ def run_gui():
             messagebox.showerror("Error while timing", str(exc))
             return
         output_text.delete("1.0", "end")
-        output_text.insert("1.0", f"{alg_name}: {t:.6f} sec (avg over {rep} runs)")
+        output_text.insert("1.0", f"{display_name}: {t:.6f} sec (avg over {rep} runs)")
         time_label.config(text=f"Last timed: {t:.6f} sec (avg)")
 
     def do_clear():

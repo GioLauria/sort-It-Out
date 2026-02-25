@@ -42,4 +42,4 @@ ALGORITHMS_LOWER: Dict[str, Callable[[List], List]] = {
     name.lower(): func for name, func in ALGORITHMS.items()
 }
 
-__all__ = ["ALGORITHMS"]
+__all__ = ["ALGORITHMS", "ALGORITHMS_LOWER"]
