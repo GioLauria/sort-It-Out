@@ -137,6 +137,60 @@ cat data.txt | sortItOut -i - -s bubble
 The `--sort` option accepts algorithm names: bubble, quick, merge, selection,
 insertion, heap, shell, counting, radix, bucket, comb, cocktail, gnome.
 
+CLI options (examples)
+----------------------
+
+Here are short examples showing each CLI option and how to combine them.
+
+- Input file (`-i`, `--input`): read values from a file (one value per line)
+
+```bash
+sortItOut -i data.txt
+```
+
+Read from stdin (use `-` or omit `-i` and pipe data):
+
+```bash
+cat data.txt | sortItOut -s bubble
+# or
+cat data.txt | sortItOut -i - -s bubble
+```
+
+- Algorithm (`-s`, `--sort`): choose the sorting algorithm (default: `merge`)
+
+```bash
+sortItOut -i data.txt -s quick
+```
+
+- Timing (`--time`) and repeats (`-r`, `--repeat`): print average timing
+
+```bash
+sortItOut -i data.txt -s quick --time -r 5
+```
+
+- GUI (`--gui`): launch the graphical interface
+
+```bash
+sortItOut --gui
+```
+
+- Output file (`-o`, `--output`): write sorted results to a file (one per line)
+
+```bash
+sortItOut -i data.txt -s gnome -o sorted.txt
+```
+
+- Combine options: sort with `quick`, write output and print timing separately
+
+```bash
+sortItOut -i data.txt -s quick -o sorted.txt
+sortItOut -i data.txt -s quick --time -r 10
+```
+
+Note: when using `--time` the program prints timing information to stdout
+instead of writing sorted values; use the plain invocation (without
+`--time`) when you want the sorted output saved to a file with `-o`.
+
 Graphical interface
 -------------------
 
