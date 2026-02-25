@@ -84,3 +84,26 @@ License
 
 This project is provided under the MIT license (see the `LICENSE` file).
 
+Command-line usage
+------------------
+
+After installing the package (editable mode during development), a `sortItOut`
+console command will be available. Basic usage:
+
+```bash
+# sort a file using merge sort (default)
+sortItOut -i data.txt
+
+# sort a file using quicksort
+sortItOut -i data.txt -s quick
+
+# print timing (average over 5 runs)
+sortItOut -i data.txt -s quick --time -r 5
+
+# read from stdin and use bubble sort
+cat data.txt | sortItOut -s bubble
+```
+
+The `--sort` option accepts algorithm names: bubble, quick, merge, selection,
+insertion, heap, shell, counting, radix, bucket, comb, cocktail, gnome.
+
