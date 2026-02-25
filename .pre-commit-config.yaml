@@ -28,3 +28,18 @@ repos:
   # NOTE: pytest hook removed to avoid failing commits when pytest is not
   # available in the system environment. Run tests locally with
   # `python -m pytest -q` or enable the hook when pytest is installed.
+
+# Optional: enable the pytest pre-commit hook in environments where
+# pytest should run automatically. Uncomment the block below to enable.
+# The hook uses `language: python` and `additional_dependencies` so
+# pre-commit will create an isolated venv and install pytest for the
+# hook; this avoids depending on a system-wide pytest executable.
+#
+#  - repo: local
+#    hooks:
+#      - id: pytest
+#        name: pytest
+#        entry: pytest -q
+#        language: python
+#        additional_dependencies: ['pytest']
+#        types: [python]

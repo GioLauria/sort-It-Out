@@ -104,3 +104,49 @@ Questions or additions
 - If you'd like, I can: add deterministic seeds to tests, add a test for
   `bucket_sort`, or expand the CI workflow to include coverage or
   performance benchmarks. Tell me which one you prefer.
+
+Optional: enable pytest pre-commit hook
+---------------------------------------
+
+If you want pre-commit to run `pytest` automatically on commit in CI or
+on developer machines, you can enable the pytest hook. Two options are
+shown below; prefer the second which instructs pre-commit to create an
+isolated venv and install `pytest` as a hook dependency.
+
+1) Simple local hook (requires pytest installed system-wide):
+
+Add to `.pre-commit-config.yaml`:
+
+```yaml
+- repo: local
+  hooks:
+    - id: pytest
+      name: pytest
+      entry: pytest -q
+      language: system
+      types: [python]
+```
+
+2) Recommended: run pytest inside pre-commit's venv (no system pytest
+   required) — uncomment and add this block to `.pre-commit-config.yaml`:
+
+```yaml
+- repo: local
+  hooks:
+    - id: pytest
+      name: pytest
+      entry: pytest -q
+      language: python
+      additional_dependencies: ['pytest']
+      types: [python]
+```
+
+After editing `.pre-commit-config.yaml`, re-run:
+
+```bash
+python -m pre_commit install
+python -m pre_commit run --all-files
+```
+
+Be mindful: running tests on pre-commit can slow commits; consider
+enabling this only in CI or for contributors who want the extra safety.
