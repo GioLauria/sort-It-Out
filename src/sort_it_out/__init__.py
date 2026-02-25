@@ -1,8 +1,23 @@
+
 """SortItOut package.
 
-This package will contain sorting helpers and small utilities for examples
-and exercises.
+Expose basic sorting helpers and timing utilities.
 """
 
-__all__ = []
+from .sorts import (
+	bubble_sort,
+	quick_sort,
+	merge_sort,
+	time_sort,
+	compare_algorithms,
+)
+
+__all__ = [
+	"bubble_sort",
+	"quick_sort",
+	"merge_sort",
+	"time_sort",
+	"compare_algorithms",
+]
+
 __version__ = "0.1.0"
