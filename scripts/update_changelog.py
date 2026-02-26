@@ -17,6 +17,7 @@ import argparse
 import datetime
 import os
 import re
+import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
@@ -69,8 +70,91 @@ def make_release(changelog: str, version: str, date: str) -> str:
     if not unreleased_section.strip():
         unreleased_section = "\n- No notable changes.\n"
 
-    # Build the new release block from Unreleased
-    release_block = f"## [{version}] - {date}\n\n" + unreleased_section + "\n\n"
+    # Try to list commits since previous tag to build structured release notes
+    tag_name = version if version.startswith("v") else f"v{version}"
+    prev_tag = None
+    try:
+        tags = (
+            subprocess.check_output(["git", "tag", "--sort=-v:refname"], cwd=ROOT)
+            .decode()
+            .splitlines()
+        )
+        if tag_name in tags:
+            idx = tags.index(tag_name)
+            if idx + 1 < len(tags):
+                prev_tag = tags[idx + 1]
+    except Exception:
+        prev_tag = None
+
+    commits = []
+    try:
+        rev_range = f"{prev_tag}..{tag_name}" if prev_tag else tag_name
+        out = subprocess.check_output(
+            ["git", "log", "--no-merges", "--pretty=format:%s", rev_range],
+            cwd=ROOT,
+        ).decode()
+        commits = [s.strip() for s in out.splitlines() if s.strip()]
+    except Exception:
+        commits = []
+
+    # Group commits by Conventional Commit type -> Keep a Changelog sections
+    type_map = {
+        "feat": "Added",
+        "fix": "Fixed",
+        "docs": "Documentation",
+        "perf": "Performance",
+        "refactor": "Changed",
+        "style": "Style",
+        "test": "Tests",
+        "chore": "Chores",
+        "ci": "CI",
+        "build": "Build",
+    }
+
+    grouped: dict[str, list[str]] = {}
+    others: list[str] = []
+    for s in commits:
+        m = re.match(r"^(?P<t>[^(:\s]+)(?:\([^)]+\))?:\s*(?P<d>.+)", s)
+        if m:
+            t = m.group("t")
+            d = m.group("d").strip()
+            section = type_map.get(t, "Other")
+            grouped.setdefault(section, []).append(d)
+        else:
+            others.append(s)
+
+    if others:
+        grouped.setdefault("Other", []).extend(others)
+
+    if grouped:
+        release_lines: list[str] = []
+        # preferred order for Keep a Changelog
+        order = [
+            "Added",
+            "Changed",
+            "Fixed",
+            "Documentation",
+            "Performance",
+            "Tests",
+            "Chores",
+            "CI",
+            "Build",
+            "Style",
+            "Other",
+        ]
+        for section in order:
+            items = grouped.get(section)
+            if not items:
+                continue
+            release_lines.append(f"### {section}\n\n")
+            for it in items:
+                release_lines.append(f"- {it}\n")
+            release_lines.append("\n")
+
+        release_block = f"## [{version}] - {date}\n\n" + "".join(release_lines)
+    else:
+        # Fall back to the Unreleased section if no commits found
+        release_block = f"## [{version}] - {date}\n\n" + unreleased_section + "\n\n"
 
     # Parse existing release sections into (version, block_text)
     releases = []
