@@ -1,0 +1,26 @@
+name: Validate changelog
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  check:
+    name: Changelog check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+
+      - name: Gather changed files
+        run: git diff --name-only origin/${{ github.base_ref }}...HEAD > changed_files.txt
+
+      - name: Run changelog validation
+        run: |
+          export CHANGED_FILES="$(cat changed_files.txt)"
+          python scripts/check_unreleased.py
