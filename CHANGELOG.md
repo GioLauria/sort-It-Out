@@ -9,6 +9,11 @@ semantic versioning.
 
 - TODO: add unreleased changes
 
+## [0.3.2] - 2026-02-26
+
+
+- TODO: add unreleased changes
+
 ## [0.3.1] - 2026-02-26
 
 
