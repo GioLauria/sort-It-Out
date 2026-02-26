@@ -42,11 +42,35 @@ async function main() {
 
   if (!entries.length) {
     try {
-      const lastTag = execSync('git describe --tags --abbrev=0 $(git rev-list --tags --max-count=1) || true', { encoding: 'utf8' }).trim();
+      // Find tags sorted by creation date (newest first)
+      const tagsOutput = execSync('git for-each-ref --sort=-creatordate --format="%(refname:short)" refs/tags', { encoding: 'utf8' }).trim();
+      const tags = tagsOutput ? tagsOutput.split(/\r?\n/).map(t => t.trim()).filter(Boolean) : [];
+
+      // Determine the previous tag relative to the current tag (if any)
+      let prevTag = '';
+      if (tag) {
+        const idx = tags.indexOf(tag);
+        if (idx !== -1) prevTag = tags[idx + 1] || '';
+        else prevTag = tags[0] || '';
+      } else {
+        prevTag = tags[0] || '';
+      }
+
       let cmd;
-      if (lastTag && tag) cmd = `git log ${lastTag}..${tag} --pretty=format:'- %s (%an)' -n 200`;
-      else if (tag) cmd = `git log ${tag} -n 200 --pretty=format:'- %s (%an)'`;
-      else cmd = `git log -n 200 --pretty=format:'- %s (%an)'`;
+      // If we have a previous tag and a current tag, list commits between them
+      if (prevTag && tag && prevTag !== tag) {
+        cmd = `git log ${prevTag}..${tag} --pretty=format:'- %s (%an)'`;
+      } else if (tag) {
+        // No previous tag found (or tag not in list) -- show commits reachable from the tag
+        cmd = `git log ${tag} --pretty=format:'- %s (%an)'`;
+      } else if (prevTag) {
+        // No current tag (untagged run) but tags exist: show commits since latest tag
+        cmd = `git log ${prevTag}..HEAD --pretty=format:'- %s (%an)'`;
+      } else {
+        // No tags at all: show full history
+        cmd = `git log --pretty=format:'- %s (%an)'`;
+      }
+
       const out = execSync(cmd, { encoding: 'utf8' });
       entries = out.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
     } catch (e) {
