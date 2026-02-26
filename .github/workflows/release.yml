@@ -18,7 +18,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -57,53 +58,15 @@ jobs:
         run: |
           echo "Files in dist:"; ls -la dist || true; find dist -maxdepth 3 -type f -print || true
 
-      - name: Generate release notes
-        id: generate_notes
-        uses: actions/github-script@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          script: |
-            const fs = require('fs');
-            const { execSync } = require('child_process');
-            // Robustly determine tag name from various environment sources
-            const ref = (typeof github !== 'undefined' && github.context && github.context.ref)
-              ? github.context.ref
-              : (process.env.GITHUB_REF || process.env.GITHUB_REF_NAME || '');
-            const tag = ref && ref.startsWith('refs/tags/') ? ref.replace('refs/tags/', '') : ref;
-            const ver = tag && tag.startsWith('v') ? tag.slice(1) : tag;
-            let body = '';
-            try {
-              if (ver) {
-                const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
-                const header = '## [' + ver + ']';
-                const idx = changelog.indexOf(header);
-                if (idx !== -1) {
-                  // find next section header starting with '\n## [' after the matched one
-                  const nextIdx = changelog.indexOf('\n## [', idx + header.length);
-                  body = (nextIdx === -1) ? changelog.slice(idx) : changelog.slice(idx, nextIdx);
-                  body = body.trim();
-                }
-              }
-            } catch (err) {
-              // ignore and fallback to git log
-            }
-            if (!body) {
-              try {
-                body = execSync("git --no-pager log --pretty=format:'- %s (%an)' -n 200", { encoding: 'utf8' });
-              } catch (err) {
-                body = 'No commit notes generated.';
-              }
-            }
-            // Write multiline output reliably to GITHUB_OUTPUT for downstream steps
-            const outPath = process.env.GITHUB_OUTPUT;
-            if (outPath) {
-              // Guard against the unlikely presence of EOF marker in body
-              const marker = 'END_OF_RELEASE_BODY';
-              const safeBody = body.replace(new RegExp(marker, 'g'), marker + '_REPLACED');
-              fs.appendFileSync(outPath, `body<<${marker}\n${safeBody}\n${marker}\n`);
-            } else {
-              // Fallback: set as console result (github-script will expose as 'result')
-              return { body };
-            }
+          node-version: '18'
+
+      - name: Run release notes generator
+        id: generate_notes
+        run: |
+          node .github/scripts/generate-release-notes.js
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1
