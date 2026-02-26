@@ -9,6 +9,18 @@ semantic versioning.
 
 - TODO: add unreleased changes
 
+## [0.3.3] - 2026-02-26
+
+### Chores
+
+- regenerate CHANGELOG from git tags
+- update CHANGELOG for v0.3.2 (include commits)
+- update CHANGELOG for v0.3.2
+
+### CI
+
+- add changelog updater workflow and script; chore(release): update CHANGELOG for v0.3.1
+
 ## [0.3.2] - 2026-02-26
 
 ### CI
