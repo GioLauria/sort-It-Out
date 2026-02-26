@@ -59,6 +59,18 @@ def run_gui():
 
     frm = ttk.Frame(root, padding=10)
     frm.grid(row=0, column=0, sticky="nsew")
+    # Ensure root expands so child frames can stretch
+    try:
+        root.grid_rowconfigure(0, weight=1)
+        root.grid_columnconfigure(0, weight=1)
+    except Exception:
+        pass
+    # Ensure input and output text rows expand so the docs frame's bottom
+    # lines up with the `Items` label row when the window is resized.
+    frm.grid_rowconfigure(1, weight=1)
+    frm.grid_rowconfigure(5, weight=1)
+    frm.grid_columnconfigure(0, weight=1)
+    frm.grid_columnconfigure(4, weight=1)
 
     # Create a smaller font for the documentation viewer to avoid overly large text
     try:
@@ -497,6 +509,12 @@ def run_gui():
     # matches the text/html view height (keeps their bottoms aligned).
     docs_content.grid_rowconfigure(0, weight=1)
     docs_content.grid_columnconfigure(0, weight=1)
+    # Make docs_frame grow so its content area can expand vertically
+    try:
+        docs_frame.grid_rowconfigure(1, weight=1)
+        docs_frame.grid_columnconfigure(0, weight=1)
+    except Exception:
+        pass
     if _MD_HTML_AVAILABLE:
         # HTMLLabel: attempt to apply font and wrap HTML on set
         docs_view = HTMLLabel(docs_content, html="", width=60)
@@ -563,10 +581,14 @@ def run_gui():
             else:
                 repo_root = Path(__file__).resolve().parents[2]
 
+            # Prefer repo-root README.md when available
             p = repo_root / "README.md"
 
-            # If not present on disk, try package resources (when installed)
-            if not p.exists():
+            content = None
+            if p.exists():
+                content = p.read_text(encoding="utf-8")
+            else:
+                # Try package resources (when installed)
                 try:
                     import importlib.resources as pkg_res
 
@@ -576,12 +598,27 @@ def run_gui():
                         and getattr(candidate, "is_file", lambda: False)()
                     ):
                         content = candidate.read_text(encoding="utf-8")
-                    else:
-                        content = None
                 except Exception:
                     content = None
-            else:
-                content = p.read_text(encoding="utf-8")
+
+            # Fallbacks: working directory, then parent directories up to 6 levels
+            if not content:
+                try:
+                    cwd_cand = Path.cwd() / "README.md"
+                    if cwd_cand.exists():
+                        content = cwd_cand.read_text(encoding="utf-8")
+                except Exception:
+                    pass
+
+            if not content:
+                for i in range(1, 7):
+                    try:
+                        cand = Path(__file__).resolve().parents[i] / "README.md"
+                        if cand.exists():
+                            content = cand.read_text(encoding="utf-8")
+                            break
+                    except Exception:
+                        continue
 
             if not content:
                 messagebox.showinfo("Help", "README.md not found in repository.")
