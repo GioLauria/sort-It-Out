@@ -217,12 +217,26 @@ def run_gui():
     def _load_algorithm_doc(name: str):
         """Load the markdown doc for algorithm `name` and display in the docs view."""
         try:
-            repo_root = Path(__file__).resolve().parents[2]
-            doc_paths = [
-                repo_root / "docs" / "algorithms" / f"{name.lower()}.md",
-                repo_root / "docs" / f"{name.lower()}.md",
-                repo_root / "docs" / "algorithms" / "index.md",
-            ]
+            # When bundled by PyInstaller, resources live under _MEIPASS
+            if getattr(sys, "frozen", False):
+                repo_root = Path(
+                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
+                )
+            else:
+                repo_root = Path(__file__).resolve().parents[2]
+            # Try common filename variants (lowercase, hyphen, underscore)
+            name_lower = name.lower()
+            variants = {
+                name_lower,
+                name_lower.replace(" ", "-"),
+                name_lower.replace(" ", "_"),
+                name_lower.replace("_", "-"),
+            }
+            doc_paths = []
+            for v in variants:
+                doc_paths.append(repo_root / "docs" / "algorithms" / f"{v}.md")
+                doc_paths.append(repo_root / "docs" / f"{v}.md")
+            doc_paths.append(repo_root / "docs" / "algorithms" / "index.md")
             # Also consider docs installed inside the package (when packaged by
             # the installer/wheel). Use importlib.resources to locate package
             # data if present.
@@ -238,11 +252,65 @@ def run_gui():
             except Exception:
                 # importlib.resources may not find package data; ignore
                 pass
+
             content = None
+
+            # helper: support both pathlib.Path and importlib.resources Traversable
+            def _read_candidate(p):
+                try:
+                    # importlib.resources Traversable-like objects
+                    is_file = getattr(p, "is_file", None)
+                    read_text = getattr(p, "read_text", None)
+                    if callable(is_file) and callable(read_text):
+                        if p.is_file():
+                            return p.read_text(encoding="utf-8")
+                        return None
+                    # pathlib.Path or string path
+                    pp = Path(p)
+                    if pp.exists():
+                        return pp.read_text(encoding="utf-8")
+                except Exception:
+                    return None
+                return None
+
+            tried = []
             for p in doc_paths:
-                if p.exists():
-                    content = p.read_text(encoding="utf-8")
+                tried.append(str(p))
+                content = _read_candidate(p)
+                if content:
                     break
+
+            # If not found yet, try fuzzy matching in the docs directories
+            def _normalize(s: str) -> str:
+                return "".join(ch for ch in s.lower() if ch.isalnum())
+
+            if content is None:
+                candidates = []
+                try:
+                    alg_dir = repo_root / "docs" / "algorithms"
+                    if alg_dir.exists():
+                        candidates.extend(list(alg_dir.glob("*.md")))
+                    docs_dir = repo_root / "docs"
+                    if docs_dir.exists():
+                        candidates.extend(
+                            [p for p in docs_dir.glob("*.md") if p not in candidates]
+                        )
+                except Exception:
+                    candidates = []
+
+                norm_name = _normalize(name)
+                for p in candidates:
+                    try:
+                        stem = p.stem
+                        if (
+                            _normalize(stem) == norm_name
+                            or norm_name in _normalize(stem)
+                            or _normalize(stem) in norm_name
+                        ):
+                            content = p.read_text(encoding="utf-8")
+                            break
+                    except Exception:
+                        continue
             if content is None:
                 if _MD_HTML_AVAILABLE:
                     try:
@@ -253,14 +321,33 @@ def run_gui():
                     except Exception:
                         # fallback to plain text if HTMLLabel doesn't support set_html
                         docs_view.delete("1.0", "end")
-                        msg1 = "No documentation found for '{}'.".format(name)
-                        msg2 = "Searched: " + str(doc_paths)
+                        msg1 = "No documentation found for '{}'".format(name)
+                        # Show which files we checked and their existence
+                        details = []
+                        for p in doc_paths:
+                            try:
+                                if hasattr(p, "exists"):
+                                    exists = p.exists()
+                                else:
+                                    exists = Path(str(p)).exists()
+                            except Exception:
+                                exists = False
+                            details.append(f"{p} (exists={exists})")
+                        msg2 = "Searched: " + "\n".join(details)
                         docs_view.insert("1.0", msg1 + "\n" + msg2)
                 else:
                     docs_view.delete("1.0", "end")
+                    details = []
+                    for p in doc_paths:
+                        try:
+                            exists = Path(p).exists()
+                        except Exception:
+                            exists = False
+                        details.append(f"{p} (exists={exists})")
                     docs_view.insert(
                         "1.0",
-                        f"No documentation found for '{name}'.\nSearched: {doc_paths}",
+                        f"No documentation found for '{name}'.\nSearched: \n"
+                        + "\n".join(details),
                     )
                 return
 
