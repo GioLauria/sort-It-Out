@@ -81,8 +81,13 @@ def run_gui():
     except Exception:
         _docs_font = None
 
-    # initial pixel size used for HTML rendering (can be adjusted by user)
-    _docs_font_px = int(_docs_font.cget("size")) if _docs_font is not None else 12
+    # fixed pixel size used for HTML rendering (fixed to 8)
+    _docs_font_px = 8
+    if _docs_font is not None:
+        try:
+            _docs_font.configure(size=_docs_font_px)
+        except Exception:
+            pass
 
     def _wrap_html_small(html: str) -> str:
         # Wrap rendered HTML in a div that reduces base font-size for better readability
@@ -422,49 +427,7 @@ def run_gui():
     docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
     # Place Item Details label aligned with the docs content (col 0)
     ttk.Label(docs_frame, text="Item Details").grid(row=0, column=0, sticky="w")
-    # Place Font size label and spinbox on the same row as Item Details,
-    # aligned to the right of the header area
-    docs_font_size_var = tk.IntVar(value=_docs_font_px)
-    ttk.Label(docs_frame, text="Font size:").grid(
-        row=0, column=1, sticky="e", padx=(8, 0)
-    )
-    docs_size_spin = tk.Spinbox(
-        docs_frame,
-        from_=8,
-        to=36,
-        width=4,
-        textvariable=docs_font_size_var,
-        justify="center",
-        command=lambda: _set_docs_font_size(docs_font_size_var.get()),
-    )
-    docs_size_spin.grid(row=0, column=2, sticky="e", padx=(4, 0))
-
-    def _set_docs_font_size(val):
-        nonlocal _docs_font_px, _docs_font, _docs_state
-        try:
-            size = int(val)
-        except Exception:
-            return
-        _docs_font_px = size
-        try:
-            if _docs_font is not None:
-                _docs_font.configure(size=size)
-            # apply to current widget if present
-            try:
-                docs_view.configure(font=_docs_font)
-            except Exception:
-                pass
-        except Exception:
-            pass
-        # Re-apply currently shown content with the new size
-        try:
-            if _MD_HTML_AVAILABLE and _docs_state.get("html"):
-                docs_view.set_html(_wrap_html_small(_docs_state.get("html")))
-            elif not _MD_HTML_AVAILABLE and _docs_state.get("text"):
-                docs_view.delete("1.0", "end")
-                docs_view.insert("1.0", _docs_state.get("text"))
-        except Exception:
-            pass
+    # Font size fixed to 8px; no UI control to change it
 
     # spinbox command is configured where the spinbox is created below
     # If markdown rendering libs are missing, show install hint and button

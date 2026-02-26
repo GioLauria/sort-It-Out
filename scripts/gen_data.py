@@ -1,6 +1,7 @@
 import argparse
 import random
 import time
+from typing import List
 
 
 def main(
@@ -10,14 +11,23 @@ def main(
 
     Defaults: 1000 numbers between 0 and 1_000_000_000.
     """
+    # Write `count` integers to `path` using the generator below.
     random.seed()
     t0 = time.perf_counter()
     with open(path, "w", encoding="utf-8") as fh:
-        for _ in range(count):
-            fh.write(str(random.randint(lo, hi)) + "\n")
+        for n in generate_data(count, lo, hi):
+            fh.write(str(n) + "\n")
     t1 = time.perf_counter()
     elapsed = t1 - t0
     print(f"Wrote {count} integers to '{path}' in {elapsed:.4f} seconds")
+
+
+def generate_data(count: int = 1000, lo: int = 0, hi: int = 1_000_000_000) -> List[int]:
+    """Return a list of `count` random integers in range [lo, hi].
+
+    This lets callers generate data in-memory without writing files.
+    """
+    return [random.randint(lo, hi) for _ in range(count)]
 
 
 if __name__ == "__main__":
