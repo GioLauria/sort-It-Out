@@ -13,6 +13,9 @@ semantic versioning.
 
 ### Chores
 
+- update CHANGELOG for v0.3.3
+- link CONTRIBUTING; remind to run install_hooks.py after cloning
+- update CHANGELOG for v0.3.3 (format)
 - regenerate CHANGELOG from git tags
 - update CHANGELOG for v0.3.2 (include commits)
 - update CHANGELOG for v0.3.2
