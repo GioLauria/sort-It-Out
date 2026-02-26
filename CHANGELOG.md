@@ -9,6 +9,21 @@ semantic versioning.
 
 - TODO: add unreleased changes
 
+## [0.4.0] - 2026-02-26
+
+### Chores
+
+- dummy push test
+- update CHANGELOG for v0.3.4
+
+### CI
+
+- remove automated changelog PR creation
+
+### Other
+
+- remove item details/docs area; simplify GUI to sorting only
+
 ## [0.3.4] - 2026-02-26
 
 ### Fixed
