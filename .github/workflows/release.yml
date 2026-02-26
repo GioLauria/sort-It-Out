@@ -28,7 +28,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          node .github/scripts/generate-release-notes.js
+          # generate notes to a file, then expose them via GITHUB_OUTPUT
+          node .github/scripts/generate-release-notes.js > release_notes.txt || true
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       # Automated changelog PR creation removed — changelog is updated in-place
       # If you want to re-enable automated PR creation, re-add the
@@ -93,7 +97,10 @@ jobs:
       - name: Run release notes generator
         id: generate_notes
         run: |
-          node .github/scripts/generate-release-notes.js
+          node .github/scripts/generate-release-notes.js > release_notes.txt || true
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create release and upload artifacts
         uses: softprops/action-gh-release@v1

@@ -50,12 +50,49 @@ def _parse_input(text: str):
 
 def run_gui():
     root = tk.Tk()
-    # Append release/version to the title when available
-    try:
-        ver = __version__
-    except Exception:
-        ver = "unknown"
+    # Append release/version to the title when available. Use a small
+    # polling loop that re-reads the package _version.py so the title
+    # updates dynamically if the version file changes on disk.
+    def _read_version_from_file() -> str:
+        try:
+            ver_path = Path(__file__).resolve().parent / "_version.py"
+            txt = ver_path.read_text(encoding="utf-8")
+            import re
+
+            m = re.search(r"__version__\s*=\s*['\"]([^'\"]+)['\"]", txt)
+            if m:
+                return m.group(1)
+        except Exception:
+            pass
+        try:
+            return __version__
+        except Exception:
+            return "unknown"
+
+    ver = _read_version_from_file()
     root.title(f"SortItOut — GUI (v{ver})")
+
+    # periodically refresh the title if the version file changes
+    def _refresh_title():
+        try:
+            v2 = _read_version_from_file()
+            current = root.title()
+            # root.title() returns the full string; update only if different
+            desired = f"SortItOut — GUI (v{v2})"
+            if current != desired:
+                root.title(desired)
+        except Exception:
+            pass
+        try:
+            root.after(5000, _refresh_title)
+        except Exception:
+            # if after is unavailable, ignore
+            pass
+
+    try:
+        root.after(5000, _refresh_title)
+    except Exception:
+        pass
 
     frm = ttk.Frame(root, padding=10)
     frm.grid(row=0, column=0, sticky="nsew")
@@ -101,7 +138,6 @@ def run_gui():
     # Menu: File -> Import, (separator), Exit
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
-    alg_menu_top = tk.Menu(menubar, tearoff=0)
 
     def _import_file():
         path = filedialog.askopenfilename(
@@ -135,7 +171,6 @@ def run_gui():
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=_exit_app)
     menubar.add_cascade(label="File", menu=file_menu)
-    menubar.add_cascade(label="Algorithms", menu=alg_menu_top)
     root.config(menu=menubar)
 
     ttk.Label(frm, text="Input (one value per line or comma-separated):").grid(
@@ -231,179 +266,7 @@ def run_gui():
         if alg_var.get() not in allowed:
             alg_var.set(allowed[0])
 
-    def _load_algorithm_doc(name: str):
-        """Load the markdown doc for algorithm `name` and display in the docs view."""
-        try:
-            # When bundled by PyInstaller, resources live under _MEIPASS
-            if getattr(sys, "frozen", False):
-                repo_root = Path(
-                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
-                )
-            else:
-                repo_root = Path(__file__).resolve().parents[2]
-            # Try common filename variants (lowercase, hyphen, underscore)
-            name_lower = name.lower()
-            variants = {
-                name_lower,
-                name_lower.replace(" ", "-"),
-                name_lower.replace(" ", "_"),
-                name_lower.replace("_", "-"),
-            }
-            doc_paths = []
-            for v in variants:
-                doc_paths.append(repo_root / "docs" / "algorithms" / f"{v}.md")
-                doc_paths.append(repo_root / "docs" / f"{v}.md")
-            doc_paths.append(repo_root / "docs" / "algorithms" / "index.md")
-            # Also consider docs installed inside the package (when packaged by
-            # the installer/wheel). Use importlib.resources to locate package
-            # data if present.
-            try:
-                import importlib.resources as pkg_res
-
-                pkg_docs_alg = pkg_res.files("sort_it_out") / "docs" / "algorithms"
-                pkg_docs_md = pkg_res.files("sort_it_out") / "docs"
-                # append package-installed locations to search list
-                doc_paths.append(pkg_docs_alg / f"{name.lower()}.md")
-                doc_paths.append(pkg_docs_md / f"{name.lower()}.md")
-                doc_paths.append(pkg_docs_alg / "index.md")
-            except Exception:
-                # importlib.resources may not find package data; ignore
-                pass
-
-            content = None
-
-            # helper: support both pathlib.Path and importlib.resources Traversable
-            def _read_candidate(p):
-                try:
-                    # importlib.resources Traversable-like objects
-                    is_file = getattr(p, "is_file", None)
-                    read_text = getattr(p, "read_text", None)
-                    if callable(is_file) and callable(read_text):
-                        if p.is_file():
-                            return p.read_text(encoding="utf-8")
-                        return None
-                    # pathlib.Path or string path
-                    pp = Path(p)
-                    if pp.exists():
-                        return pp.read_text(encoding="utf-8")
-                except Exception:
-                    return None
-                return None
-
-            tried = []
-            for p in doc_paths:
-                tried.append(str(p))
-                content = _read_candidate(p)
-                if content:
-                    break
-
-            # If not found yet, try fuzzy matching in the docs directories
-            def _normalize(s: str) -> str:
-                return "".join(ch for ch in s.lower() if ch.isalnum())
-
-            if content is None:
-                candidates = []
-                try:
-                    alg_dir = repo_root / "docs" / "algorithms"
-                    if alg_dir.exists():
-                        candidates.extend(list(alg_dir.glob("*.md")))
-                    docs_dir = repo_root / "docs"
-                    if docs_dir.exists():
-                        candidates.extend(
-                            [p for p in docs_dir.glob("*.md") if p not in candidates]
-                        )
-                except Exception:
-                    candidates = []
-
-                norm_name = _normalize(name)
-                for p in candidates:
-                    try:
-                        stem = p.stem
-                        if (
-                            _normalize(stem) == norm_name
-                            or norm_name in _normalize(stem)
-                            or _normalize(stem) in norm_name
-                        ):
-                            content = p.read_text(encoding="utf-8")
-                            break
-                    except Exception:
-                        continue
-            if content is None:
-                if _MD_HTML_AVAILABLE:
-                    try:
-                        not_found_html = _wrap_html_small(
-                            f"<pre>No documentation found for '{name}'.</pre>"
-                        )
-                        docs_view.set_html(not_found_html)
-                    except Exception:
-                        # fallback to plain text if HTMLLabel doesn't support set_html
-                        docs_view.delete("1.0", "end")
-                        msg1 = "No documentation found for '{}'".format(name)
-                        # Show which files we checked and their existence
-                        details = []
-                        for p in doc_paths:
-                            try:
-                                if hasattr(p, "exists"):
-                                    exists = p.exists()
-                                else:
-                                    exists = Path(str(p)).exists()
-                            except Exception:
-                                exists = False
-                            details.append(f"{p} (exists={exists})")
-                        msg2 = "Searched: " + "\n".join(details)
-                        docs_view.insert("1.0", msg1 + "\n" + msg2)
-                else:
-                    docs_view.delete("1.0", "end")
-                    details = []
-                    for p in doc_paths:
-                        try:
-                            exists = Path(p).exists()
-                        except Exception:
-                            exists = False
-                        details.append(f"{p} (exists={exists})")
-                    docs_view.insert(
-                        "1.0",
-                        f"No documentation found for '{name}'.\nSearched: \n"
-                        + "\n".join(details),
-                    )
-                return
-
-            if _MD_HTML_AVAILABLE:
-                try:
-                    html = markdown.markdown(
-                        content, extensions=["fenced_code", "tables"]
-                    )
-                except Exception:
-                    html = markdown.markdown(content) if markdown else ""
-                try:
-                    _docs_state["html"] = html
-                    docs_view.set_html(_wrap_html_small(html))
-                except Exception:
-                    # If set_html not available, replace widget with plain text view
-                    docs_view.delete("1.0", "end")
-                    docs_view.insert("1.0", content)
-            else:
-                docs_view.delete("1.0", "end")
-                _docs_state["text"] = content
-                docs_view.insert("1.0", content)
-                docs_view.insert(
-                    "end",
-                    "\n\nInstall 'markdown' and 'tkhtmlview' to render formatted docs.",
-                )
-        except Exception as exc:
-            if _MD_HTML_AVAILABLE:
-                try:
-                    docs_view.set_html(
-                        _wrap_html_small(
-                            f"<pre>Error loading docs for '{name}': {exc}</pre>"
-                        )
-                    )
-                except Exception:
-                    docs_view.delete("1.0", "end")
-                    docs_view.insert("1.0", f"Error loading docs for '{name}': {exc}")
-            else:
-                docs_view.delete("1.0", "end")
-                docs_view.insert("1.0", f"Error loading docs for '{name}': {exc}")
+    # Documentation loading removed — GUI focuses on sorting only.
 
     repeat_var = tk.IntVar(value=3)
     # Move Repeat controls to align with input/output columns (left side)
@@ -420,95 +283,7 @@ def run_gui():
     output_text.configure(yscrollcommand=output_scroll.set)
     output_scroll.grid(row=5, column=3, sticky="ns", pady=(2, 8))
 
-    # Documentation viewer on the right
-    docs_frame = ttk.Frame(frm)
-    # Use rowspan=8 so the bottom edge of the docs area aligns with
-    # the row that contains the `Items` label (row 7).
-    docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
-    # Place Item Details label aligned with the docs content (col 0)
-    ttk.Label(docs_frame, text="Item Details").grid(row=0, column=0, sticky="w")
-    # Font size fixed to 8px; no UI control to change it
-
-    # spinbox command is configured where the spinbox is created below
-    # If markdown rendering libs are missing, show install hint and button
-    if not _MD_HTML_AVAILABLE:
-        hint_frame = ttk.Frame(docs_frame)
-        hint_frame.grid(row=0, column=1, sticky="e")
-        ttk.Label(
-            hint_frame, text="(Install markdown+tkhtmlview for formatted docs)"
-        ).pack(side="left")
-
-        def _install_md_pkgs():
-            try:
-                messagebox.showinfo(
-                    "Install",
-                    "Installing markdown and tkhtmlview. This may take a moment.",
-                )
-                args = [
-                    sys.executable,
-                    "-m",
-                    "pip",
-                    "install",
-                    "markdown",
-                    "tkhtmlview",
-                ]
-                subprocess.check_call(args)
-                install_done_msg = (
-                    "Installation complete. Please restart the application to "
-                    "enable formatted docs."
-                )
-                messagebox.showinfo("Install", install_done_msg)
-            except Exception as exc:
-                messagebox.showerror("Install failed", str(exc))
-
-        ttk.Button(hint_frame, text="Install", command=_install_md_pkgs).pack(
-            side="left", padx=(6, 0)
-        )
-    # Create a content area. Use HTML rendering when available; otherwise Text fallback
-    docs_content = ttk.Frame(docs_frame)
-    # place content below the header (Item Details) and font controls
-    docs_content.grid(row=1, column=0, columnspan=3, sticky="nsew")
-    # Ensure the docs content area expands evenly so the scrollbar height
-    # matches the text/html view height (keeps their bottoms aligned).
-    docs_content.grid_rowconfigure(0, weight=1)
-    docs_content.grid_columnconfigure(0, weight=1)
-    # Make docs_frame grow so its content area can expand vertically
-    try:
-        docs_frame.grid_rowconfigure(1, weight=1)
-        docs_frame.grid_columnconfigure(0, weight=1)
-    except Exception:
-        pass
-    if _MD_HTML_AVAILABLE:
-        # HTMLLabel: attempt to apply font and wrap HTML on set
-        docs_view = HTMLLabel(docs_content, html="", width=60)
-        docs_view.grid(row=0, column=0, sticky="nsew")
-        try:
-            if _docs_font is not None:
-                docs_view.configure(font=_docs_font)
-        except Exception:
-            pass
-        try:
-            docs_scroll = ttk.Scrollbar(
-                docs_content, orient="vertical", command=docs_view.yview
-            )
-            docs_view.configure(yscrollcommand=docs_scroll.set)
-            # place scrollbar in column 2 so we can show controls just left of it
-            docs_scroll.grid(row=0, column=2, sticky="ns")
-        except Exception:
-            # HTMLLabel may not support yview; ignore scrollbar in that case
-            pass
-    else:
-        docs_view = tk.Text(
-            docs_content, height=30, width=60, wrap="word", font=_docs_font
-        )
-        docs_view.grid(row=0, column=0, sticky="nsew")
-        docs_scroll = ttk.Scrollbar(
-            docs_content, orient="vertical", command=docs_view.yview
-        )
-        docs_view.configure(yscrollcommand=docs_scroll.set)
-        docs_scroll.grid(row=0, column=2, sticky="ns")
-
-    # (font controls are placed in the docs_frame header)
+    # Documentation / item details area removed — GUI now focuses on sorting only.
 
     time_label = ttk.Label(frm, text="Last sort: N/A")
     time_label.grid(row=7, column=0, columnspan=2, sticky="w", pady=(6, 0))
@@ -517,140 +292,20 @@ def run_gui():
     # Align the right edge of the items count with the Clear button (same column)
     items_label.grid(row=7, column=2, sticky="e", pady=(6, 0))
 
-    # Initialize algorithm menu to show all algorithms
-    _update_alg_menu_for([])
+    # Defer populating algorithm menu entries so the main window appears quickly.
+    def _init_algorithm_menus():
+        try:
+            _update_alg_menu_for([])
+        except Exception:
+            pass
 
-    # Populate the Algorithms top-level menu so users can open docs
+    # Schedule menu population once the UI is idle to avoid startup delay
     try:
-        for name in sorted(ALGORITHMS.keys()):
-            alg_menu_top.add_command(
-                label=name, command=lambda n=name: _load_algorithm_doc(n)
-            )
+        root.after_idle(_init_algorithm_menus)
     except Exception:
-        pass
+        _init_algorithm_menus()
 
-    # Help menu with Help and Changelog entries
-    help_menu = tk.Menu(menubar, tearoff=0)
-
-    def _show_help():
-        try:
-            # Resolve README location similar to _load_algorithm_doc so the
-            # Help view works when running from source, an installed package
-            # or a PyInstaller bundle.
-            if getattr(sys, "frozen", False):
-                repo_root = Path(
-                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
-                )
-            else:
-                repo_root = Path(__file__).resolve().parents[2]
-
-            # Prefer repo-root README.md when available
-            p = repo_root / "README.md"
-
-            content = None
-            if p.exists():
-                content = p.read_text(encoding="utf-8")
-            else:
-                # Try package resources (when installed)
-                try:
-                    import importlib.resources as pkg_res
-
-                    candidate = pkg_res.files("sort_it_out") / "README.md"
-                    if (
-                        candidate is not None
-                        and getattr(candidate, "is_file", lambda: False)()
-                    ):
-                        content = candidate.read_text(encoding="utf-8")
-                except Exception:
-                    content = None
-
-            # Fallbacks: working directory, then parent directories up to 6 levels
-            if not content:
-                try:
-                    cwd_cand = Path.cwd() / "README.md"
-                    if cwd_cand.exists():
-                        content = cwd_cand.read_text(encoding="utf-8")
-                except Exception:
-                    pass
-
-            if not content:
-                for i in range(1, 7):
-                    try:
-                        cand = Path(__file__).resolve().parents[i] / "README.md"
-                        if cand.exists():
-                            content = cand.read_text(encoding="utf-8")
-                            break
-                    except Exception:
-                        continue
-
-            if not content:
-                messagebox.showinfo("Help", "README.md not found in repository.")
-                return
-
-            if _MD_HTML_AVAILABLE and markdown:
-                html = markdown.markdown(content, extensions=["fenced_code", "tables"])
-                try:
-                    docs_view.set_html(_wrap_html_small(html))
-                    return
-                except Exception:
-                    pass
-            docs_view.delete("1.0", "end")
-            docs_view.insert("1.0", content)
-        except Exception as exc:
-            messagebox.showerror("Error", str(exc))
-
-    def _show_changelog():
-        try:
-            # Resolve CHANGELOG location similar to _load_algorithm_doc/_show_help
-            if getattr(sys, "frozen", False):
-                repo_root = Path(
-                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
-                )
-            else:
-                repo_root = Path(__file__).resolve().parents[2]
-
-            p = repo_root / "CHANGELOG.md"
-
-            # If not present on disk, try package resources (when installed)
-            if not p.exists():
-                try:
-                    import importlib.resources as pkg_res
-
-                    candidate = pkg_res.files("sort_it_out") / "CHANGELOG.md"
-                    if (
-                        candidate is not None
-                        and getattr(candidate, "is_file", lambda: False)()
-                    ):
-                        content = candidate.read_text(encoding="utf-8")
-                    else:
-                        content = None
-                except Exception:
-                    content = None
-            else:
-                content = p.read_text(encoding="utf-8")
-
-            if not content:
-                messagebox.showinfo(
-                    "Changelog", "CHANGELOG.md not found in repository."
-                )
-                return
-
-            if _MD_HTML_AVAILABLE and markdown:
-                html = markdown.markdown(content, extensions=["fenced_code", "tables"])
-                try:
-                    docs_view.set_html(_wrap_html_small(html))
-                    return
-                except Exception:
-                    pass
-            docs_view.delete("1.0", "end")
-            docs_view.insert("1.0", content)
-        except Exception as exc:
-            messagebox.showerror("Error", str(exc))
-
-    help_menu.add_command(label="Changelog", command=_show_changelog)
-    help_menu.add_separator()
-    help_menu.add_command(label="Help", command=_show_help)
-    menubar.add_cascade(label="Help", menu=help_menu)
+    # Help / changelog removed — simplified UI for sorting only.
 
     def do_sort():
         txt = input_text.get("1.0", "end")
