@@ -102,6 +102,9 @@ Contributing and code of conduct
 - See `CONTRIBUTING.md` for development, testing and PR guidelines.
 - See `CODE_OF_CONDUCT.md` for expected behaviour and reporting.
 
+- Please read `CONTRIBUTING.md` before contributing, opening PRs, or creating
+    release tags.
+
 CI & Release
 -------------
 

@@ -66,127 +66,99 @@ pytest
 
 ## Releases and changelog
 
-- The repository uses an automated GitHub Actions workflow to produce
-	release artifacts and to generate release notes. To keep the
-	`CHANGELOG.md` in sync with releases the workflow will automatically
-	generate a changelog section when a tag matching `v*` is pushed.
+The project uses a local pre-push hook to keep `CHANGELOG.md` synchronized
+with tag releases. Maintainers and contributors must follow these steps to
+ensure the changelog is updated and published alongside tags.
 
-- Workflow behavior (maintainers and contributors):
+### Install the local hook (per machine)
 
-	1. When a tag like `v0.3.0` is pushed, the `prepare` job runs and
-		 executes `.github/scripts/generate-release-notes.js`. The script
-		 extracts release notes from `CHANGELOG.md` (prefers `## [<version>]`,
-		 then `## [Unreleased]`, then falls back to `git log`) and writes an
-		 updated `CHANGELOG.md` that inserts a `## [<version>] — <date>`
-		 section.
+Run this once for every clone where you will push tags:
 
-	2. The workflow then commits the changelog update to a new branch and
-		 opens an automated pull request named `changelog/<tag>` targeting
-		 `master`. This gives maintainers the opportunity to review and merge
-		 the changelog change instead of allowing the workflow to push to the
-		 protected branch directly.
+```powershell
+python scripts/install_hooks.py
+```
 
-	3. The build and release jobs create platform artifacts and a GitHub
-		 Release using the generated release notes. The PR is independent of
-		 the Release creation, so merging the changelog PR is recommended to
-		 keep the repository history consistent with the published releases.
+This installs a `pre-push` hook in `.git/hooks/pre-push` that:
 
-- Recommended maintainer steps when publishing a release:
+- detects any tags being pushed;
+- runs `python scripts/update_changelog.py --tag <tag>` for each pushed tag;
+- if `CHANGELOG.md` was modified, stages and commits it locally with message
+  `chore(release): update CHANGELOG for <tag>` and pushes `origin HEAD` so the
+  changelog commit reaches the remote before the tag.
 
-	- Push an annotated tag from a local clone:
+Note: hooks are local to the clone. Make sure all maintainers install the
+hook; otherwise tag pushes from clones without the hook will not update the
+changelog automatically.
 
-		```bash
-		git tag -a v0.3.0 -m "Release v0.3.0"
-		git push origin v0.3.0
-		```
+### Tagging and pushing a release (maintainer workflow)
 
-	- After pushing the tag, a PR `changelog/v0.3.0` will be opened
-		automatically. Review and merge that PR to update `CHANGELOG.md` in
-		the repository.
+1. Ensure your working tree is clean (except uncommitted changes to
+   `CHANGELOG.md` if you are editing it manually):
 
-	- The release artifacts and the GitHub Release are created by the
-		workflow; verify the release page and attached artifacts after the
-		workflow completes.
+```powershell
+git status --porcelain
+```
 
-- Notes and troubleshooting:
+2. Create an annotated tag locally (replace `vX.Y.Z`):
 
-	- The workflow requires `contents: write` permissions (configured in
-		the workflow) so that it can create PRs and releases; ensure the job
-		runs with sufficient permissions in your organization.
-	- If your default branch is not `master`, update the workflow files
-		(`.github/workflows/release.yml` and the release script) to target
-		the correct branch.
-	- If you prefer the changelog to be included in the tagged commit
-		itself, consider updating the release process to create tags only
-		after the changelog PR is merged, or modify the workflow to re-tag
-		(note: re-tagging rewrites history and is discouraged for public
-		releases).
+```powershell
+git tag -a vX.Y.Z -m "Release vX.Y.Z"
+```
 
-	### Local preview helper
+3. Push the tag to remote:
 
-	A small helper script is provided to reproduce the workflow's `prepare`
-	job locally and create a branch containing the `CHANGELOG.md` update.
+```powershell
+git push origin vX.Y.Z
+```
 
-	- Location: `scripts/preview_changelog_pr.py`
-	- Purpose: run the generator for a specific tag, write `CHANGELOG.md`,
-	  create a local branch `changelog/<tag>` and commit the changelog change.
+The `pre-push` hook will run when the tag push occurs. If the hook updates
+`CHANGELOG.md`, it will commit and push the changelog update (`origin HEAD`) so
+the changelog edit arrives on the remote before the tag.
 
-	Usage (from repository root):
+### Bypassing the hook
 
-	```bash
-	python scripts/preview_changelog_pr.py v0.3.0
-	```
+Automation or CI systems may need to bypass hooks; use `--no-verify` to skip
+hooks when pushing:
 
-	Options:
+```powershell
+git push --no-verify origin vX.Y.Z
+```
 
-	- `--branch`: specify a different branch name (default `changelog/<tag>`)
-	- `--push`: push the created branch to `origin` (the script does not
-	  push by default to avoid accidental uploads)
+Use this carefully; skipping hooks means the changelog will not be updated
+automatically by the local process.
 
-	Notes:
+### Testing the process locally
 
-	- The helper invokes the release notes generator (`node .github/scripts/generate-release-notes.js`),
-	  so you need `node` available on your PATH.
-	- The script refuses to run if the working tree contains uncommitted
-	  changes other than `CHANGELOG.md` to avoid accidental commits.
+1. Install the hook:
 
-	Recommended preview workflow:
+```powershell
+python scripts/install_hooks.py
+```
 
-	```bash
-	# Ensure working tree is clean (or only CHANGELOG.md changed)
-	git status --porcelain
+2. Create a tag and push it (see Tagging and pushing a release). Observe the
+   hook's output; if `CHANGELOG.md` was updated it will be committed and the
+   branch pushed before the tag arrives.
 
-	# Generate changelog update and create branch
-	python scripts/preview_changelog_pr.py v0.3.0
+3. Verify on GitHub that both the changelog commit and the tag are present.
 
-	# Inspect the branch and commit
-	git checkout changelog/v0.3.0
-	git show --name-only
+### Onboarding new maintainers
 
-	# Push and open a PR when ready
-	git push origin changelog/v0.3.0
-	# then open a PR from changelog/v0.3.0 -> master
-	```
+Add the following checklist to your onboarding notes or `CONTRIBUTING.md`
+overview so new maintainers know to install the hook:
 
-	### Keeping documentation and changelog in sync
+- Run `python scripts/install_hooks.py` after cloning the repository.
+- Use annotated tags (`git tag -a vX.Y.Z -m "Release vX.Y.Z"`).
+- Push tags normally (`git push origin vX.Y.Z`) — the local hook will handle
+  changelog updates and push the changelog commit automatically.
 
-	All changes that add, alter or remove features must update the relevant
-	documentation in the `docs/` folder and, when user-visible, the
-	`CHANGELOG.md` file. A checklist to ensure docs stay in sync:
+### If you prefer a repo-level workflow
 
-	- Add or update the corresponding `docs/` page(s) for the feature.
-	- Update `CHANGELOG.md` under `## [Unreleased]` with a short entry.
-	- Run the preview helper to verify the generated release section for a
-	  given tag if you are preparing a release.
-	- Run pre-commit and the test suite before opening a PR:
+If you want changelog updates to be performed centrally (via GitHub Actions)
+instead of locally, we can reintroduce the workflow that runs on tag pushes
+and commits the changelog on the remote. That approach ensures consistent
+behavior across all machines but requires careful coordination to avoid
+duplicate commits when both local hooks and the workflow run.
 
-	```bash
-	python -m pre_commit run --all-files
-	pytest
-	```
-
-	- Include doc changes in the same PR as code changes when practical,
-	  or reference the documentation PR in the issue/PR description.
 
 ## Commit signing
 
