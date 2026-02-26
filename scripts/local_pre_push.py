@@ -68,6 +68,18 @@ def main() -> int:
     if os.environ.get("LOCAL_PRE_PUSH_RUNNING"):
         return 0
 
+    # Run the test suite before allowing a push to proceed. This blocks
+    # pushes when tests fail to help keep remote branches green. Set
+    # `SKIP_PRE_PUSH_TESTS=1` in the environment to opt out (useful for
+    # emergency or very large test suites).
+    if not os.environ.get("SKIP_PRE_PUSH_TESTS"):
+        python = sys.executable or "python"
+        try:
+            subprocess.check_call([python, "-m", "pytest", "-q"], cwd=ROOT)
+        except subprocess.CalledProcessError:
+            print("Pre-push: tests failed. Aborting push.", file=sys.stderr)
+            return 1
+
     refs = read_refs(sys.stdin)
     tags = []
     for local_ref, local_sha, remote_ref, remote_sha in refs:

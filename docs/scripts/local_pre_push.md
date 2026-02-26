@@ -18,3 +18,16 @@ Usage
 ```bash
 echo "refs/heads/master 012345 refs/tags/v0.0.0 000000" | python scripts/local_pre_push.py
 ```
+
+Behavior changes
+- The hook now runs the project's test suite (`pytest`) before allowing a push to proceed. If tests fail, the push is aborted to avoid pushing a broken state to the remote.
+
+Usage
+- No direct arguments; invoked automatically by git when the pre-push hook runs. For local testing you can run it manually (it expects git refs on stdin). Example (test):
+
+```bash
+echo "refs/heads/master 012345 refs/tags/v0.0.0 000000" | python scripts/local_pre_push.py
+```
+
+Opt-out
+- To skip the test run (e.g., for emergency pushes), set the environment variable `SKIP_PRE_PUSH_TESTS=1` before pushing. The script will still update changelog entries for pushed tags but will not run tests.
