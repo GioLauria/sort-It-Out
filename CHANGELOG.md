@@ -9,6 +9,29 @@ semantic versioning.
 
 - TODO: add unreleased changes
 
+## [0.3.4] - 2026-02-26
+
+### Fixed
+
+- robustly locate README/CHANGELOG for Help/Changelog menus (black formatted)
+
+### Chores
+
+- add pre-commit test runner and update hook installer
+- update CHANGELOG for v0.3.3
+
+### Style
+
+- fix lint issues
+- layout + help/changelog resolution fixes
+- align Item Details bottom and scrollbar with Items label
+- align Items label and Item Details bottom with Clear button
+
+### Other
+
+- run tests pre-push; document SKIP_PRE_PUSH_TESTS opt-out
+- use generate_data and central ALGORITHMS; scripts/docs added; remove placeholder test; fix flake8 in temp check
+
 ## [0.3.3] - 2026-02-26
 
 ### Chores
