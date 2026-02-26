@@ -11,8 +11,7 @@ semantic versioning.
 
 ## [0.3.2] - 2026-02-26
 
-
-- TODO: add unreleased changes
+- 3b71f16 ci(changelog): add validation workflow and check script (Giovanni Lauria)
 
 ## [0.3.1] - 2026-02-26
 
