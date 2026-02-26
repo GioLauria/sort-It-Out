@@ -7,9 +7,28 @@ semantic versioning.
 
 ## [Unreleased]
 
+- TODO: add unreleased changes
+
+## [0.3.1] - 2026-02-26
+
+
 - Docs: moved per-algorithm documentation to `docs/algorithms/` and
   removed legacy `docs/alghorythms/` folder.
 - Minor documentation updates and metadata improvements.
+
+## [0.3.0] - 2026-02-26
+
+- Release: packaged as `0.3.0.post1` (packaging metadata); bugfixes,
+  docs and minor packaging improvements.
+
+## [0.2.4] - 2026-02-25
+
+- Release: patch with documentation fixes and packaging adjustments.
+- Refactor: centralized algorithm registry in `src/sort_it_out/algorithms.py`.
+- API/CLI: algorithm names use canonical capitalized names (e.g. `Merge`,
+  `Quick`); CLI accepts case-insensitive lookup for backward compatibility.
+- Docs: README and docs updated to use canonical algorithm names and
+  document new GUI features.
 
 ## [0.2.3] - 2026-02-25
 
@@ -31,12 +50,6 @@ semantic versioning.
   items count that supports newline- or comma-separated input.
 - GUI: algorithm selector now shows only algorithms that support the
   current input data types (integer-only, float-in-[0,1), homogeneous
-  strings, etc.).
-- Refactor: centralized algorithm registry in `src/sort_it_out/algorithms.py`.
-- API/CLI: algorithm names use canonical capitalized names (e.g. `Merge`,
-  `Quick`); CLI accepts case-insensitive lookup for backward compatibility.
-- Docs: README and docs updated to use canonical algorithm names and
-  document new GUI features.
 
 ## [0.1.3] - 2026-02-25
 
