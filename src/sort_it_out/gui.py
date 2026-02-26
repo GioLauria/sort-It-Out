@@ -553,12 +553,40 @@ def run_gui():
 
     def _show_help():
         try:
-            repo_root = Path(__file__).resolve().parents[2]
+            # Resolve README location similar to _load_algorithm_doc so the
+            # Help view works when running from source, an installed package
+            # or a PyInstaller bundle.
+            if getattr(sys, "frozen", False):
+                repo_root = Path(
+                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
+                )
+            else:
+                repo_root = Path(__file__).resolve().parents[2]
+
             p = repo_root / "README.md"
+
+            # If not present on disk, try package resources (when installed)
             if not p.exists():
+                try:
+                    import importlib.resources as pkg_res
+
+                    candidate = pkg_res.files("sort_it_out") / "README.md"
+                    if (
+                        candidate is not None
+                        and getattr(candidate, "is_file", lambda: False)()
+                    ):
+                        content = candidate.read_text(encoding="utf-8")
+                    else:
+                        content = None
+                except Exception:
+                    content = None
+            else:
+                content = p.read_text(encoding="utf-8")
+
+            if not content:
                 messagebox.showinfo("Help", "README.md not found in repository.")
                 return
-            content = p.read_text(encoding="utf-8")
+
             if _MD_HTML_AVAILABLE and markdown:
                 html = markdown.markdown(content, extensions=["fenced_code", "tables"])
                 try:
@@ -573,14 +601,40 @@ def run_gui():
 
     def _show_changelog():
         try:
-            repo_root = Path(__file__).resolve().parents[2]
+            # Resolve CHANGELOG location similar to _load_algorithm_doc/_show_help
+            if getattr(sys, "frozen", False):
+                repo_root = Path(
+                    getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[2])
+                )
+            else:
+                repo_root = Path(__file__).resolve().parents[2]
+
             p = repo_root / "CHANGELOG.md"
+
+            # If not present on disk, try package resources (when installed)
             if not p.exists():
+                try:
+                    import importlib.resources as pkg_res
+
+                    candidate = pkg_res.files("sort_it_out") / "CHANGELOG.md"
+                    if (
+                        candidate is not None
+                        and getattr(candidate, "is_file", lambda: False)()
+                    ):
+                        content = candidate.read_text(encoding="utf-8")
+                    else:
+                        content = None
+                except Exception:
+                    content = None
+            else:
+                content = p.read_text(encoding="utf-8")
+
+            if not content:
                 messagebox.showinfo(
                     "Changelog", "CHANGELOG.md not found in repository."
                 )
                 return
-            content = p.read_text(encoding="utf-8")
+
             if _MD_HTML_AVAILABLE and markdown:
                 html = markdown.markdown(content, extensions=["fenced_code", "tables"])
                 try:
