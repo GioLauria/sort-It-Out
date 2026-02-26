@@ -493,6 +493,10 @@ def run_gui():
     docs_content = ttk.Frame(docs_frame)
     # place content below the header (Item Details) and font controls
     docs_content.grid(row=1, column=0, columnspan=3, sticky="nsew")
+    # Ensure the docs content area expands evenly so the scrollbar height
+    # matches the text/html view height (keeps their bottoms aligned).
+    docs_content.grid_rowconfigure(0, weight=1)
+    docs_content.grid_columnconfigure(0, weight=1)
     if _MD_HTML_AVAILABLE:
         # HTMLLabel: attempt to apply font and wrap HTML on set
         docs_view = HTMLLabel(docs_content, html="", width=60)
