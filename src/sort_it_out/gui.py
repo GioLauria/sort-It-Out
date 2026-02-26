@@ -405,7 +405,9 @@ def run_gui():
 
     # Documentation viewer on the right
     docs_frame = ttk.Frame(frm)
-    docs_frame.grid(row=0, column=4, rowspan=9, sticky="nsew", padx=(12, 0))
+    # Use rowspan=8 so the bottom edge of the docs area aligns with
+    # the row that contains the `Items` label (row 7).
+    docs_frame.grid(row=0, column=4, rowspan=8, sticky="nsew", padx=(12, 0))
     # Place Item Details label aligned with the docs content (col 0)
     ttk.Label(docs_frame, text="Item Details").grid(row=0, column=0, sticky="w")
     # Place Font size label and spinbox on the same row as Item Details,
@@ -527,7 +529,8 @@ def run_gui():
     time_label.grid(row=7, column=0, columnspan=2, sticky="w", pady=(6, 0))
 
     items_label = ttk.Label(frm, text="Items: 0")
-    items_label.grid(row=7, column=2, columnspan=2, sticky="w", pady=(6, 0))
+    # Align the right edge of the items count with the Clear button (same column)
+    items_label.grid(row=7, column=2, sticky="e", pady=(6, 0))
 
     # Initialize algorithm menu to show all algorithms
     _update_alg_menu_for([])
