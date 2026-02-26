@@ -14,6 +14,8 @@ ROOT = os.path.dirname(os.path.dirname(__file__))
 HOOKS_DIR = os.path.join(ROOT, ".git", "hooks")
 PRE_PUSH_SRC = os.path.join(ROOT, "scripts", "local_pre_push.py")
 PRE_PUSH_DEST = os.path.join(HOOKS_DIR, "pre-push")
+PRE_COMMIT_SRC = os.path.join(ROOT, "scripts", "local_pre_commit.py")
+PRE_COMMIT_DEST = os.path.join(HOOKS_DIR, "pre-commit")
 
 
 def install() -> None:
@@ -44,6 +46,24 @@ def install() -> None:
     st = os.stat(PRE_PUSH_DEST)
     os.chmod(PRE_PUSH_DEST, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     print("Installed pre-push hook to .git/hooks/pre-push")
+    # Install pre-commit hook shim
+    shim_commit = (
+        "#!/usr/bin/env python3\n"
+        "import runpy, os, sys\n"
+        "runpy.run_path(\n"
+        "    os.path.join(\n"
+        "        os.path.dirname(__file__),\n"
+        "        '..', '..', 'scripts', 'local_pre_commit.py'\n"
+        "    ),\n"
+        "    run_name='__main__'\n"
+        ")\n"
+    )
+
+    with open(PRE_COMMIT_DEST, "w", encoding="utf-8") as fh:
+        fh.write(shim_commit)
+    st = os.stat(PRE_COMMIT_DEST)
+    os.chmod(PRE_COMMIT_DEST, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    print("Installed pre-commit hook to .git/hooks/pre-commit")
     # Gentle reminder for other developers after cloning
     print(
         (
