@@ -102,6 +102,13 @@ Contributing and code of conduct
 - See `CONTRIBUTING.md` for development, testing and PR guidelines.
 - See `CODE_OF_CONDUCT.md` for expected behaviour and reporting.
 
+CI & Release
+-------------
+
+See `docs/ci.md` for details about the GitHub Actions release workflow,
+how `CHANGELOG.md` is generated, and the local helper script used to
+preview changelog PRs: `scripts/preview_changelog_pr.py`.
+
 License
 -------
 
@@ -252,10 +259,41 @@ Recent updates made to the repository (what changed and where to look):
     instructions to build a single-file executable (Windows `.exe`) using
     PyInstaller; built artifacts appear under `dist/` locally.
 
-- **CI / Releases:** A GitHub Actions workflow was added to build
-    platform artifacts on tag pushes and create a GitHub Release. The
-    release job now declares required `permissions` so the release action
-    can create releases and attach artifacts reliably.
+     - **CI / Releases:**
+
+          A GitHub Actions workflow runs on tag pushes (refs matching `v*`) to
+          produce platform artifacts and create GitHub Releases. The workflow is
+          split into three logical phases:
+
+          1. **Prepare** — runs on the tag push and executes the release notes
+              generator script (`.github/scripts/generate-release-notes.js`). This
+              script extracts release notes from `CHANGELOG.md` (preferring a
+              `## [<version>]` section, then `## [Unreleased]`, and finally
+              falling back to `git log`). The script writes an updated
+              `CHANGELOG.md` (inserting a new `## [<version>] — <date>` section)
+              but does not push commits.
+
+              After the script runs, the workflow opens an automated pull request
+              (branch `changelog/<tag>`) containing the updated `CHANGELOG.md` so
+              maintainers can review and merge the changelog edit. This keeps the
+              changelog in sync with releases while respecting branch protection.
+
+          2. **Build** — the workflow builds single-file executables using
+              PyInstaller on a small matrix of OS targets (`ubuntu-latest` and
+              `windows-latest`). The workflow checks out full git history
+              (`fetch-depth: 0`) so tags and history are available to the
+              release notes generator.
+
+          3. **Release** — once artifacts are built, the workflow generates the
+              final release body (using the same generator) and creates a GitHub
+              Release attaching the built artifacts using `softprops/action-gh-release`.
+
+          The release workflow requires write permissions (`contents: write`)
+          so the action can create releases and attach artifacts. See
+          `.github/workflows/release.yml` and
+          `.github/scripts/generate-release-notes.js` for implementation details
+          and to customize behavior (for example, changing the default branch
+          from `master`).
 
 - **Documentation:** Per-algorithm docs are available under
     `docs/algorithms/` and contributor docs cover testing, pre-commit and

@@ -32,12 +32,13 @@ async function main() {
   const ver = tag && tag.startsWith('v') ? tag.slice(1) : tag;
 
   let entries = [];
+  let changelog = null;
   try {
-    const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+    changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
     if (ver) entries = extractFromChangelog(changelog, `## [${ver}]`);
     if (!entries.length) entries = extractFromChangelog(changelog, '## [Unreleased]');
   } catch (e) {
-    // ignore
+    // ignore (we'll fall back to git log)
   }
 
   if (!entries.length) {
@@ -123,6 +124,24 @@ async function main() {
 
   const body = lines.join('\n');
   writeOutput(body);
+
+  // If we have a tag and changelog Unreleased section, automatically
+  // move the entries into a new released section and push the change
+  // back to the default branch (main) so the CHANGELOG is kept up-to-date.
+  try {
+    if (tag && changelog && changelog.includes('## [Unreleased]') && entries.length) {
+      const unreHeader = '## [Unreleased]';
+      const insertIdx = changelog.indexOf(unreHeader) + unreHeader.length;
+      const cleanedEntries = entries.map(e => e.replace(/^[-\s]+/, ''));
+      const newSection = `\n\n## [${ver}] - ${date}\n\n` + cleanedEntries.map(e => `- ${e}`).join('\n') + '\n';
+      const updated = changelog.slice(0, insertIdx) + newSection + changelog.slice(insertIdx);
+      fs.writeFileSync('CHANGELOG.md', updated, 'utf8');
+      // Do not commit or push here; the workflow will create a branch and open a PR
+      // with the updated CHANGELOG so branch protection is respected.
+    }
+  } catch (e) {
+    // swallow any changelog update errors
+  }
 }
 
 main().catch(err => { console.error(err); process.exit(1); });

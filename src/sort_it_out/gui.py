@@ -649,12 +649,17 @@ def run_gui():
         time_label.config(text="Last sort: N/A")
         _update_alg_menu_for([])
 
-    btn_sort = ttk.Button(frm, text="Sort", command=do_sort)
-    btn_sort.grid(row=6, column=0, sticky="w")
-    btn_time = ttk.Button(frm, text="Time", command=do_time)
-    btn_time.grid(row=6, column=1, sticky="w")
+    # Group Sort and Time so they remain adjacent regardless of column widths
+    action_frame = ttk.Frame(frm)
+    action_frame.grid(row=6, column=0, sticky="w")
+    btn_sort = ttk.Button(action_frame, text="Sort", command=do_sort)
+    btn_sort.pack(side="left")
+    btn_time = ttk.Button(action_frame, text="Time", command=do_time)
+    btn_time.pack(side="left", padx=(6, 0))
+
+    # Keep Clear aligned to the right edge of the output column
     btn_clear = ttk.Button(frm, text="Clear", command=do_clear)
-    btn_clear.grid(row=6, column=2, sticky="w")
+    btn_clear.grid(row=6, column=2, sticky="e")
 
     root.mainloop()
 

@@ -136,3 +136,22 @@ from `src/sort_it_out/__init__.py` to make them available for benchmarking.
 
 This project is released under the MIT license (see the repository
 `LICENSE` file).
+
+## CI / Releases
+
+- The project uses GitHub Actions to automate release builds and the
+	generation of release notes. Key points:
+
+	- A `release` workflow triggers on tag pushes (tags matching `v*`).
+	- A `prepare` step runs a Node script (`.github/scripts/generate-release-notes.js`) which
+		extracts release notes from `CHANGELOG.md` or, if absent, from `git log`,
+		and writes an updated `CHANGELOG.md` with a new `## [<version>] — <date>` section.
+	- Instead of pushing changes directly to the default branch, the workflow
+		opens an automated pull request (branch `changelog/<tag>`) so maintainers
+		can review and merge the changelog update. This respects branch protection.
+	- After the changelog PR is merged and artifacts are built, the workflow
+		creates a GitHub Release and uploads the built `dist/*` artifacts.
+
+Refer to `.github/workflows/release.yml` and `.github/scripts/generate-release-notes.js`
+for implementation details and configuration options (branch name, labels,
+and behavior for tag handling).
